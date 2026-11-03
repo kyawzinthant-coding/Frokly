@@ -1,0 +1,77 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+*.test
+*.out
+
+# Go build cache
+go-build/
+
+# Go workspace file
+go.work
+
+# Environment files
+.env
+.env.*
+!.env.example
+backend/.env.*
+frontend/.env
+docker/.env
+docker/.env.*
+!docker/.env.example
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependencies
+vendor/
+
+# Test coverage
+*.coverage
+coverage.out
+coverage.html
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Docker
+.dockerignore
+
+# OS specific
+Thumbs.db
+.DS_Store
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Build artifacts
+dist/
+build/
+*.tar.gz
+*.zip
+
+# Local files
+amy-admin/
+goroutine.pb.gz
+*.numbers
+*.xlsx
+app/main
+
+# Local-stack DB init (cleaned copy of the prod dump — never commit data)
+docker/localdb-init/
