@@ -7,6 +7,9 @@ MIGRATE_CMD=cd backend && go run ./cmd/migrate
 
 .PHONY: run migrate-up migrate-down migrate-reset migrate-status
 
+build:
+	@cd backend && go build -o bin/backend cmd/api/main.go
+
 run:
 	cd backend && go run ./cmd/api
 
@@ -21,3 +24,8 @@ migrate-reset:
 
 migrate-status:
 	$(MIGRATE_CMD) -action=status
+
+gen-api:
+	@cd backend && oapi-codegen --config cfg.yaml ../openapi/openapi.yaml
+	@echo "Generated api/gen.go from openapi.yaml"
+

@@ -8,6 +8,8 @@ bin/
 *.test
 *.out
 
+.idea
+
 # Go build cache
 go-build/
 
@@ -65,6 +67,9 @@ dist/
 build/
 *.tar.gz
 *.zip
+
+# Local mentor/context notes (not for other contributors)
+CLAUDE.md
 
 # Local files
 amy-admin/

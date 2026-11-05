@@ -18,6 +18,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
+	github.com/oapi-codegen/oapi-codegen/v2 v2.8.1-0.20261031214924-b4fdfe1ac6b0 // indirect
 	github.com/sethvargo/go-retry v0.5.0 // indirect
 	go.uber.org/dig v1.19.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
@@ -25,5 +26,5 @@ require (
 	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 )

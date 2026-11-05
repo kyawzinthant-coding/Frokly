@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: Forkly
+  version: 0.1.0
+
+servers:
+  - url: /
+
+paths:
+  /v1/status:
+    get:
+      operationId: getStatus
+      summary: Get service status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+
+components:
+  schemas:
+    StatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+      required:
+        - status
