@@ -9,4 +9,6 @@ var Config = fx.Module("configuration",
 	fx.Provide(
 		config.LoadConfig,
 	),
+
+	fx.Provide(func(cfg *config.AppConfig) *config.DatabaseConfig { return cfg.DataBase }),
 )

@@ -23,6 +23,9 @@ func main() {
 
 	app := fx.New(
 		modules.Config,
+		modules.Database,
+		modules.HandlerModule,
+		modules.ServerModule,
 	)
 
 	app.Run()
