@@ -68,8 +68,5 @@ func (h *HttpServer) Start(lc fx.Lifecycle) error {
 			return srv.Shutdown(ctx)
 		},
 	})
-
-	log.Info().Msg("Starting HTTP server")
-	return srv.ListenAndServe()
-
+	return nil
 }
