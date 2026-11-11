@@ -1,8 +1,11 @@
 package handler
 
+import "database/sql"
+
 type Handler struct {
+	db *sql.DB
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(db *sql.DB) *Handler {
+	return &Handler{db: db}
 }

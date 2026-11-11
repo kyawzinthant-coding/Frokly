@@ -18,6 +18,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StatusResponse"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
 
 components:
   schemas:
@@ -27,5 +33,9 @@ components:
         status:
           type: string
           example: ok
+        database:
+          type: string
+          example: ok
       required:
         - status
+        - database

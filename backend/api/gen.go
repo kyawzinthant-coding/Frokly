@@ -15,6 +15,9 @@ import (
 
 // StatusResponse defines model for StatusResponse.
 type StatusResponse struct {
+	// Database Example: ok
+	Database string `json:"database"`
+
 	// Status Example: ok
 	Status string `json:"status"`
 }
@@ -196,6 +199,20 @@ func (response GetStatus200JSONResponse) VisitGetStatusResponse(w http.ResponseW
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStatus503JSONResponse StatusResponse
+
+func (response GetStatus503JSONResponse) VisitGetStatusResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(503)
 	_, err := buf.WriteTo(w)
 	return err
 }

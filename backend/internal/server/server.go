@@ -31,7 +31,7 @@ func NewHttpServer(
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
 
-	h := handler.NewHandler()
+	h := handler.NewHandler(db)
 	strict := api.NewStrictHandler(h, nil)
 
 	mux := api.HandlerFromMux(strict, r)
