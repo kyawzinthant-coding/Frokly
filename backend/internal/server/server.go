@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/kyawzinthant-coding/froky/api"
 	"github.com/kyawzinthant-coding/froky/config"
 	"github.com/kyawzinthant-coding/froky/internal/handler"
 	"github.com/rs/zerolog/log"
 	"go.uber.org/fx"
 	"net/http"
+	"strings"
 )
 
 type HttpServer struct {
@@ -30,6 +32,28 @@ func NewHttpServer(
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
+
+	// CORS middlewares
+	allowedOrigins := make([]string, 0)
+	for _, o := range strings.Split(cfg.CorsConfig.AllowOrigins, ",") {
+		if trimmed := strings.TrimSpace(o); trimmed != "" {
+			allowedOrigins = append(allowedOrigins, trimmed)
+		}
+	}
+
+	allowMethods := make([]string, 0)
+	for _, m := range strings.Split(cfg.CorsConfig.AllowMethods, ",") {
+		if trimmed := strings.TrimSpace(m); trimmed != "" {
+			allowMethods = append(allowMethods, trimmed)
+		}
+	}
+
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins: allowedOrigins,
+		AllowedMethods: allowMethods,
+		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		MaxAge:         300,
+	}))
 
 	h := handler.NewHandler(db)
 	strict := api.NewStrictHandler(h, nil)
