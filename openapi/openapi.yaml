@@ -7,6 +7,54 @@ servers:
   - url: /
 
 paths:
+  /v1/vendor/login:
+    post:
+      operationId: vendorLogin
+      summary: Vendor staff login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VendorLoginRequest"
+      responses:
+        "200":
+          description: Login succeeded; session cookie set via Set-Cookie header
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorResponse"
+        "401":
+          description: Invalid username or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/vendor/me:
+    get:
+      operationId: vendorMe
+      summary: Get the currently authenticated vendor's profile
+      security:
+        - vendorCookieAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorResponse"
+        "401":
+          description: Missing, invalid, or expired session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /v1/status:
     get:
       operationId: getStatus
@@ -26,7 +74,50 @@ paths:
                 $ref: "#/components/schemas/StatusResponse"
 
 components:
+  securitySchemes:
+    vendorCookieAuth:
+      type: apiKey
+      in: cookie
+      name: vendor_token
   schemas:
+    VendorLoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: vendor1
+        password:
+          type: string
+          example: password123
+      required:
+        - username
+        - password
+
+    VendorResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          description: Vendor business name
+        username:
+          type: string
+          description: Username of the vendor_staff account that logged in
+      required:
+        - id
+        - name
+        - username
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
     StatusResponse:
       type: object
       properties:
