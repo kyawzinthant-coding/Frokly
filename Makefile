@@ -13,6 +13,9 @@ build:
 run:
 	cd backend && go run ./cmd/api
 
+seed:
+	cd backend && go run ./cmd/seed
+
 migrate-up:
 	$(MIGRATE_CMD) -action=up
 
