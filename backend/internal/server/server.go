@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -18,13 +17,12 @@ import (
 
 type HttpServer struct {
 	cfg    *config.AppConfig
-	db     *sql.DB
 	router http.Handler
 }
 
 func NewHttpServer(
+	h *handler.Handler,
 	cfg *config.AppConfig,
-	db *sql.DB,
 ) *HttpServer {
 
 	log.Debug().Msg("Starting HTTP server")
@@ -55,14 +53,12 @@ func NewHttpServer(
 		MaxAge:         300,
 	}))
 
-	h := handler.NewHandler(db)
 	strict := api.NewStrictHandler(h, nil)
 
 	mux := api.HandlerFromMux(strict, r)
 
 	return &HttpServer{
 		cfg:    cfg,
-		db:     db,
 		router: mux,
 	}
 }

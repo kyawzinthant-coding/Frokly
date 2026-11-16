@@ -24,6 +24,7 @@ func main() {
 	app := fx.New(
 		modules.Config,
 		modules.Database,
+		modules.AuthModule,
 		modules.HandlerModule,
 		modules.ServerModule,
 	)
