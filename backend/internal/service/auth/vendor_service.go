@@ -1,20 +1,21 @@
 package auth
 
 import (
-	"database/sql"
-	"github.com/kyawzinthant-coding/froky/config"
 	"time"
+
+	"github.com/kyawzinthant-coding/froky/config"
+	dbgen "github.com/kyawzinthant-coding/froky/db/generated"
 )
 
 type Service struct {
-	store     *sql.DB
+	q         *dbgen.Queries
 	jwtSecret []byte
 	expiry    time.Duration
 }
 
-func NewService(cfg *config.AppConfig, store *sql.DB) *Service {
+func NewService(cfg *config.AppConfig, q *dbgen.Queries) *Service {
 	return &Service{
-		store:     store,
+		q:         q,
 		jwtSecret: []byte(cfg.JWT.Secret),
 		expiry:    cfg.JWT.Expiry,
 	}

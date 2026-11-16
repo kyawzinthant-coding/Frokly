@@ -15,19 +15,7 @@ import (
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
 func (s *Service) Login(ctx context.Context, username, password string) (string, *types.VendorProfile, error) {
-
-	var staffID int64
-	var passwordHash string
-	var profile types.VendorProfile
-
-	err := s.store.QueryRowContext(ctx, `
-                SELECT vs.id, vs.password_hash, v.id, v.name, vs.username
-                FROM vendor_staff vs
-                JOIN vendors v ON v.id = vs.vendor_id
-                WHERE vs.username = $1`,
-		username,
-	).Scan(&staffID, &passwordHash, &profile.ID, &profile.Name, &profile.Username)
-
+	row, err := s.q.GetVendorStaffForLogin(ctx, username)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", nil, ErrInvalidCredentials
 	}
@@ -35,15 +23,15 @@ func (s *Service) Login(ctx context.Context, username, password string) (string,
 		return "", nil, err
 	}
 
-	if bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password)) != nil {
+	if bcrypt.CompareHashAndPassword([]byte(row.PasswordHash), []byte(password)) != nil {
 		return "", nil, ErrInvalidCredentials
 	}
 
 	now := time.Now()
 	claims := types.VendorClaims{
-		VendorID: profile.ID,
+		VendorID: row.VendorID,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   strconv.FormatInt(staffID, 10),
+			Subject:   strconv.FormatInt(row.StaffID, 10),
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(s.expiry)),
 		},
@@ -54,5 +42,9 @@ func (s *Service) Login(ctx context.Context, username, password string) (string,
 		return "", nil, err
 	}
 
-	return signed, &profile, nil
+	return signed, &types.VendorProfile{
+		ID:       row.VendorID,
+		Name:     row.VendorName,
+		Username: row.Username,
+	}, nil
 }
