@@ -1,10 +1,13 @@
 package config
 
+import "time"
+
 type (
 	AppConfig struct {
 		DataBase   *DatabaseConfig
 		CorsConfig *CorsConfig
 		Http       *HttpConfig
+		JWT        *JWTConfig
 	}
 	DatabaseConfig struct {
 		Host         string `env:"DATABASE_HOST,required"`
@@ -21,6 +24,12 @@ type (
 		AllowOrigins string `env:"CORS_ALLOW_ORIGINS,required"`
 		AllowMethods string `env:"CORS_ALLOW_METHODS,required"`
 	}
+
+	JWTConfig struct {
+		Secret string        `env:"JWT_SECRET,required"`
+		Expiry time.Duration `env:"JWT_EXPIRY"  envDefault:"24h"`
+	}
+
 	HttpConfig struct {
 		Port     int    `env:"HTTP_PORT,required"`
 		Timezone string `env:"TZ" envDefault:"Asia/Yangon"`

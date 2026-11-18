@@ -11,7 +11,13 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/oapi-codegen/runtime"
 )
+
+// ErrorResponse defines model for ErrorResponse.
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
 
 // StatusResponse defines model for StatusResponse.
 type StatusResponse struct {
@@ -22,11 +28,40 @@ type StatusResponse struct {
 	Status string `json:"status"`
 }
 
+// VendorLoginRequest defines model for VendorLoginRequest.
+type VendorLoginRequest struct {
+	// Password Example: password123
+	Password string `json:"password"`
+
+	// Username Example: vendor1
+	Username string `json:"username"`
+}
+
+// VendorResponse defines model for VendorResponse.
+type VendorResponse struct {
+	Id int64 `json:"id"`
+
+	// Name Vendor business name
+	Name string `json:"name"`
+
+	// Username Username of the vendor_staff account that logged in
+	Username string `json:"username"`
+}
+
+// VendorLoginJSONRequestBody defines body for VendorLogin for application/json ContentType.
+type VendorLoginJSONRequestBody = VendorLoginRequest
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// GetStatus Get service status
 	// (GET /v1/status)
 	GetStatus(w http.ResponseWriter, r *http.Request)
+	// VendorLogin Vendor staff login
+	// (POST /v1/vendor/login)
+	VendorLogin(w http.ResponseWriter, r *http.Request)
+	// VendorMe Get the currently authenticated vendor's profile
+	// (GET /v1/vendor/me)
+	VendorMe(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -36,6 +71,18 @@ type Unimplemented struct{}
 // GetStatus Get service status
 // (GET /v1/status)
 func (_ Unimplemented) GetStatus(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// VendorLogin Vendor staff login
+// (POST /v1/vendor/login)
+func (_ Unimplemented) VendorLogin(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// VendorMe Get the currently authenticated vendor's profile
+// (GET /v1/vendor/me)
+func (_ Unimplemented) VendorMe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -53,6 +100,34 @@ func (siw *ServerInterfaceWrapper) GetStatus(w http.ResponseWriter, r *http.Requ
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetStatus(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// VendorLogin operation middleware
+func (siw *ServerInterfaceWrapper) VendorLogin(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.VendorLogin(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// VendorMe operation middleware
+func (siw *ServerInterfaceWrapper) VendorMe(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.VendorMe(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -176,6 +251,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/v1/vendor/login", wrapper.VendorLogin)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/vendor/me", wrapper.VendorMe)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/v1/status", wrapper.GetStatus)
 	})
 
@@ -217,11 +298,98 @@ func (response GetStatus503JSONResponse) VisitGetStatusResponse(w http.ResponseW
 	return err
 }
 
+type VendorLoginRequestObject struct {
+	Body *VendorLoginJSONRequestBody
+}
+
+type VendorLoginResponseObject interface {
+	VisitVendorLoginResponse(w http.ResponseWriter) error
+}
+
+type VendorLogin200ResponseHeaders struct {
+	SetCookie *string
+}
+
+type VendorLogin200JSONResponse struct {
+	Body    VendorResponse
+	Headers VendorLogin200ResponseHeaders
+}
+
+func (response VendorLogin200JSONResponse) VisitVendorLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if response.Headers.SetCookie != nil {
+		w.Header().Set("Set-Cookie", fmt.Sprint(*response.Headers.SetCookie))
+	}
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type VendorLogin401JSONResponse ErrorResponse
+
+func (response VendorLogin401JSONResponse) VisitVendorLoginResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type VendorMeRequestObject struct {
+}
+
+type VendorMeResponseObject interface {
+	VisitVendorMeResponse(w http.ResponseWriter) error
+}
+
+type VendorMe200JSONResponse VendorResponse
+
+func (response VendorMe200JSONResponse) VisitVendorMeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type VendorMe401JSONResponse ErrorResponse
+
+func (response VendorMe401JSONResponse) VisitVendorMeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// GetStatus Get service status
 	// (GET /v1/status)
 	GetStatus(ctx context.Context, request GetStatusRequestObject) (GetStatusResponseObject, error)
+	// VendorLogin Vendor staff login
+	// (POST /v1/vendor/login)
+	VendorLogin(ctx context.Context, request VendorLoginRequestObject) (VendorLoginResponseObject, error)
+	// VendorMe Get the currently authenticated vendor's profile
+	// (GET /v1/vendor/me)
+	VendorMe(ctx context.Context, request VendorMeRequestObject) (VendorMeResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -280,6 +448,61 @@ func (sh *strictHandler) GetStatus(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetStatusResponseObject); ok {
 		if err := validResponse.VisitGetStatusResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// VendorLogin operation middleware
+func (sh *strictHandler) VendorLogin(w http.ResponseWriter, r *http.Request) {
+	var request VendorLoginRequestObject
+
+	var body VendorLoginJSONRequestBody
+	if err := runtime.BindJSONBody(r, &body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.VendorLogin(ctx, request.(VendorLoginRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "VendorLogin")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(VendorLoginResponseObject); ok {
+		if err := validResponse.VisitVendorLoginResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// VendorMe operation middleware
+func (sh *strictHandler) VendorMe(w http.ResponseWriter, r *http.Request) {
+	var request VendorMeRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.VendorMe(ctx, request.(VendorMeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "VendorMe")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(VendorMeResponseObject); ok {
+		if err := validResponse.VisitVendorMeResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

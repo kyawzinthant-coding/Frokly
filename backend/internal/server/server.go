@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -10,6 +9,7 @@ import (
 	"github.com/kyawzinthant-coding/froky/api"
 	"github.com/kyawzinthant-coding/froky/config"
 	"github.com/kyawzinthant-coding/froky/internal/handler"
+	authmw "github.com/kyawzinthant-coding/froky/internal/middleware"
 	"github.com/rs/zerolog/log"
 	"go.uber.org/fx"
 	"net/http"
@@ -18,13 +18,12 @@ import (
 
 type HttpServer struct {
 	cfg    *config.AppConfig
-	db     *sql.DB
 	router http.Handler
 }
 
 func NewHttpServer(
+	h *handler.Handler,
 	cfg *config.AppConfig,
-	db *sql.DB,
 ) *HttpServer {
 
 	log.Debug().Msg("Starting HTTP server")
@@ -49,20 +48,26 @@ func NewHttpServer(
 	}
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: allowedOrigins,
-		AllowedMethods: allowMethods,
-		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		MaxAge:         300,
+		AllowedOrigins:   allowedOrigins,
+		AllowedMethods:   allowMethods,
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		MaxAge:           300,
 	}))
 
-	h := handler.NewHandler(db)
+	publicRoutes := map[string]bool{
+		"GET /v1/status":        true,
+		"POST /v1/vendor/login": true,
+	}
+
+	r.Use(requireVendorAuth(publicRoutes, []byte(cfg.JWT.Secret)))
+
 	strict := api.NewStrictHandler(h, nil)
 
 	mux := api.HandlerFromMux(strict, r)
 
 	return &HttpServer{
 		cfg:    cfg,
-		db:     db,
 		router: mux,
 	}
 }
@@ -93,4 +98,18 @@ func (h *HttpServer) Start(lc fx.Lifecycle) error {
 		},
 	})
 	return nil
+}
+
+func requireVendorAuth(public map[string]bool, secret []byte) func(http.Handler) http.Handler {
+	vendorAuth := authmw.VendorJwtAuth(secret)
+	return func(next http.Handler) http.Handler {
+		protected := vendorAuth(next)
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if public[r.Method+" "+r.URL.Path] {
+				next.ServeHTTP(w, r)
+				return
+			}
+			protected.ServeHTTP(w, r)
+		})
+	}
 }

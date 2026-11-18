@@ -1,0 +1,12 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    # Read the goose migrations directly so the schema has a single source of truth.
+    # sqlc understands goose annotations and ignores the -- +goose Down sections.
+    schema: "db/migrations/version1"
+    queries: "db/queries"
+    gen:
+      go:
+        package: "dbgen"
+        out: "db/generated"
+        sql_package: "database/sql"

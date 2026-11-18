@@ -19,6 +19,7 @@ func LoadConfig() *AppConfig {
 		DataBase:   &DatabaseConfig{},
 		CorsConfig: &CorsConfig{},
 		Http:       &HttpConfig{},
+		JWT:        &JWTConfig{},
 	}
 
 	opts := env.Options{
