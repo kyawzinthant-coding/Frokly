@@ -104,8 +104,12 @@ use 16px text so phones don't zoom. Thai/Burmese will need a fallback face later
 
 Content sits in a centred column, max 1152px, 16px gutters (24px from `sm`). Tiers stack in one
 column on phones and tablets; from `lg` they sit in a 3-column grid (main tier spans 2), aligned
-to the top and repacked in whole tiers — never half-cut. Login is a single tier card, max 448px,
-centred.
+to the top and repacked in whole tiers — never half-cut. Login form is max 384px, centred.
+
+**Login** sits on a flat food court floor plan (`components/vendor/floor-plan.tsx`): numbered
+stalls around the edge, tables as outlined circles, all in `jade-wash` / `line`. The form is drawn
+as the one highlighted stall: white, 3px jade border, a jade "Your stall" pill on its top edge.
+Three drawings (landscape, tablet portrait, phone) are scaled to fit, never cropped.
 
 ## Elevation & Depth
 

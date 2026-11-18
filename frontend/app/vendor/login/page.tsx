@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { CircleAlertIcon } from "lucide-react";
 import { getVendorMeQueryKey, useVendorLogin } from "@/lib/api/generated";
 import { Wordmark } from "@/components/brand/wordmark";
+import { FloorPlan } from "@/components/vendor/floor-plan";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,17 +39,20 @@ export default function VendorLoginPage() {
     : null;
 
   return (
-    <main className="flex flex-1 items-center justify-center p-4 sm:p-8">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-card ring-1 ring-border">
-        <header className="bg-primary px-6 pt-6 pb-7 text-primary-foreground">
-          <Wordmark />
-          <h1 className="mt-8 text-2xl font-semibold">Sign in to your stall</h1>
-          <p className="mt-1 text-base">Use the staff account your food court manager gave you.</p>
-        </header>
+    <main className="relative flex flex-1 items-center justify-center overflow-hidden p-4 py-10">
+      <FloorPlan />
 
-        <p className="bg-band px-6 py-2.5 text-sm font-semibold text-band-foreground">Staff account</p>
+      <section className="relative w-full max-w-sm rounded-2xl border-3 border-primary bg-card p-6 pt-7">
+        <p className="absolute -top-3.5 left-5 rounded-full bg-primary px-3 py-1 text-sm font-semibold text-primary-foreground">
+          Your stall
+        </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-6">
+        <div className="mb-6 flex items-baseline justify-between gap-4">
+          <h1 className="text-2xl font-semibold">Sign in</h1>
+          <Wordmark className="text-lg" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <Label htmlFor="username" className="text-base">
               Username
@@ -96,7 +100,7 @@ export default function VendorLoginPage() {
             {login.isPending ? "Signing in…" : "Sign in"}
           </Button>
         </form>
-      </div>
+      </section>
     </main>
   );
 }

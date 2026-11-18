@@ -20,7 +20,7 @@ OWN-WORLD: Jade melamine #2E7D5B owns the top rail and primary actions; ground i
 
 STORY: Staff see their stall name first, know they are signed in, and see where orders will land.
 
-FIRST VIEWPORT: Login: one tiffin card; jade top tier with Forkly wordmark + "Stall sign-in", steel band, white form tier with 48px fields and full-width jade button. Dashboard: jade rail (Forkly, stall name, account menu with username + Sign out); tiers below: "Orders" band with count 0 and an empty state that teaches.
+FIRST VIEWPORT: Login: flat food court floor plan (numbered stalls, tables) fills the screen; the form is the one highlighted stall in the middle (3px jade border, 'Your stall' pill), heading 'Sign in' + wordmark, 48px fields, full-width jade button. No role-specific copy: owners and staff both sign in here. Dashboard: jade rail (Forkly, stall name, account menu with username + Sign out); tiers below: "Orders" band with count 0 and an empty state that teaches.
 
 FORM: candidate 5 of 7 (melamine tableware & tiffin carrier), seed:6037ff2cc006798f. Raises: one tonal ramp (exposure record); weight not size (timetable); flat fields (garden map); whole-cell repack (event catalog).
 
