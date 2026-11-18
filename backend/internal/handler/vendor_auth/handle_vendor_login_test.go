@@ -33,6 +33,10 @@ func (f *fakeAuth) Login(_ context.Context, username, password string) (string, 
 	return f.token, f.profile, f.err
 }
 
+func (f *fakeAuth) Me(_ context.Context, _ int64) (*types.VendorProfile, error) {
+	return f.profile, f.err
+}
+
 func newTestHandler(fake *fakeAuth) *VendorAuthHandler {
 	return &VendorAuthHandler{
 		authService: fake,

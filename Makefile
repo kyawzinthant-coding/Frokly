@@ -5,7 +5,7 @@ MIGRATE_CMD=cd backend && go run ./cmd/migrate
 -include Makefile.local
 -include $(ENV_FILE)
 
-.PHONY: run migrate-up migrate-down migrate-reset migrate-status test test-v test-pkg test-cover
+.PHONY: run gen-api gen-db generate migrate-up migrate-down migrate-reset migrate-status test test-v test-pkg test-cover
 
 build:
 	@cd backend && go build -o bin/backend cmd/api/main.go
@@ -31,6 +31,14 @@ migrate-status:
 gen-api:
 	@cd backend && oapi-codegen --config cfg.yaml ../openapi/openapi.yaml
 	@echo "Generated api/gen.go from openapi.yaml"
+
+# Generate Go code from db/queries/*.sql (reads schema from the migrations).
+gen-db:
+	@cd backend && sqlc generate
+	@echo "Generated db/generated from db/queries"
+
+# Run every code generator.
+generate: gen-api gen-db
 
 
 # ---------- tests ----------

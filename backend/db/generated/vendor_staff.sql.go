@@ -9,6 +9,36 @@ import (
 	"context"
 )
 
+const getVendorProfileByStaffId = `-- name: GetVendorProfileByStaffId :one
+SELECT
+    vs.id AS staff_id,
+    vs.username,
+    v.id             AS vendor_id,
+    v.name           AS vendor_name
+from vendor_staff vs
+JOIN vendors v ON v.id = vs.vendor_id
+where vs.id = $1
+`
+
+type GetVendorProfileByStaffIdRow struct {
+	StaffID    int64
+	Username   string
+	VendorID   int64
+	VendorName string
+}
+
+func (q *Queries) GetVendorProfileByStaffId(ctx context.Context, staffID int64) (GetVendorProfileByStaffIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getVendorProfileByStaffId, staffID)
+	var i GetVendorProfileByStaffIdRow
+	err := row.Scan(
+		&i.StaffID,
+		&i.Username,
+		&i.VendorID,
+		&i.VendorName,
+	)
+	return i, err
+}
+
 const getVendorStaffForLogin = `-- name: GetVendorStaffForLogin :one
 SELECT
     vs.id            AS staff_id,
