@@ -33,8 +33,8 @@ docker/.env.*
 *~
 .DS_Store
 
-# Dependencies
-vendor/
+# Dependencies (Go vendor dir only — a bare `vendor/` also hid frontend/app/vendor)
+/backend/vendor/
 
 # Test coverage
 *.coverage
