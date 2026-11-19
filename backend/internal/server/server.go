@@ -56,8 +56,9 @@ func NewHttpServer(
 	}))
 
 	publicRoutes := map[string]bool{
-		"GET /v1/status":        true,
-		"POST /v1/vendor/login": true,
+		"GET /v1/status":         true,
+		"POST /v1/vendor/login":  true,
+		"POST /v1/vendor/logout": true,
 	}
 
 	r.Use(requireVendorAuth(publicRoutes, []byte(cfg.JWT.Secret)))

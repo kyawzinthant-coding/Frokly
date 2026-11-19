@@ -1,6 +1,9 @@
 "use client";
 
-import { ChevronDownIcon, LogOutIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { ChevronDownIcon, CircleAlertIcon, LogOutIcon } from "lucide-react";
+import { useVendorLogout } from "@/lib/api/generated";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +15,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function AccountMenu({ username }: { username: string }) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const logout = useVendorLogout({
+    mutation: {
+      onSuccess: () => {
+        router.replace("/vendor/login");
+        queryClient.clear();
+      },
+    },
+  });
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex h-11 items-center gap-2 rounded-xl px-2 text-primary-foreground outline-none hover:bg-primary-foreground/10 focus-visible:ring-3 focus-visible:ring-primary-foreground/60 data-popup-open:bg-primary-foreground/10">
@@ -31,11 +46,21 @@ export function AccountMenu({ username }: { username: string }) {
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        {/* No action yet: wired once the backend has POST /v1/vendor/logout. */}
-        <DropdownMenuItem className="h-11 px-2 text-base">
+        <DropdownMenuItem
+          className="h-11 px-2 text-base"
+          closeOnClick={false}
+          disabled={logout.isPending}
+          onClick={() => logout.mutate()}
+        >
           <LogOutIcon aria-hidden />
-          Sign out
+          {logout.isPending ? "Signing out…" : "Sign out"}
         </DropdownMenuItem>
+        {logout.isError && (
+          <p role="alert" className="flex items-start gap-2 px-2 py-1.5 text-sm text-destructive">
+            <CircleAlertIcon aria-hidden className="mt-0.5 size-4 shrink-0" />
+            Couldn&apos;t sign out. Try again.
+          </p>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
