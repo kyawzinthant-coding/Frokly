@@ -5,25 +5,33 @@
  * OpenAPI spec version: 0.1.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
-  StatusResponse
+  ErrorResponse,
+  StatusResponse,
+  VendorLoginRequest,
+  VendorResponse
 } from '../models';
 
 import { customInstance } from '../../axios-instance';
+import type { ErrorType } from '../../axios-instance';
 
 
 
@@ -42,6 +50,163 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+/**
+ * @summary Vendor staff login
+ */
+export const vendorLogin = (
+    vendorLoginRequest: VendorLoginRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<VendorResponse>(
+      {url: `/v1/vendor/login`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: vendorLoginRequest, signal
+    },
+      );
+    }
+
+
+
+
+export const getVendorLoginMutationKey = () => ['vendorLogin'] as const;
+
+export const getVendorLoginMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof vendorLogin>>, TError,VendorLoginMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof vendorLogin>>, TError,VendorLoginMutationVariables, TContext> => {
+
+const mutationKey = getVendorLoginMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof vendorLogin>>, VendorLoginMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  vendorLogin(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type VendorLoginMutationResult = NonNullable<Awaited<ReturnType<typeof vendorLogin>>>
+    export type VendorLoginMutationBody = VendorLoginRequest
+    export type VendorLoginMutationError = ErrorType<ErrorResponse>
+    export type VendorLoginMutationVariables = {data: VendorLoginRequest}
+
+    /** @summary Vendor staff login */
+export const useVendorLogin = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof vendorLogin>>, TError,VendorLoginMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof vendorLogin>>,
+        TError,
+        VendorLoginMutationVariables,
+        TContext
+      > => {
+      return useMutation(getVendorLoginMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Get the currently authenticated vendor's profile
+ */
+export const vendorMe = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<VendorResponse>(
+      {url: `/v1/vendor/me`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getVendorMeQueryKey = () => {
+    return [
+    `/v1/vendor/me`
+    ] as const;
+    }
+
+
+export const getVendorMeQueryOptions = <TData = Awaited<ReturnType<typeof vendorMe>>, TError = ErrorType<ErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof vendorMe>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getVendorMeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof vendorMe>>> = ({ signal }) => vendorMe(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof vendorMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type VendorMeQueryResult = NonNullable<Awaited<ReturnType<typeof vendorMe>>>
+export type VendorMeQueryError = ErrorType<ErrorResponse>
+
+
+/** @summary Get the currently authenticated vendor's profile */
+export function useVendorMe<TData = Awaited<ReturnType<typeof vendorMe>>, TError = ErrorType<ErrorResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof vendorMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof vendorMe>>,
+          TError,
+          Awaited<ReturnType<typeof vendorMe>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Get the currently authenticated vendor's profile */
+export function useVendorMe<TData = Awaited<ReturnType<typeof vendorMe>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof vendorMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof vendorMe>>,
+          TError,
+          Awaited<ReturnType<typeof vendorMe>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Get the currently authenticated vendor's profile */
+export function useVendorMe<TData = Awaited<ReturnType<typeof vendorMe>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof vendorMe>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Get the currently authenticated vendor's profile */
+export function useVendorMe<TData = Awaited<ReturnType<typeof vendorMe>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof vendorMe>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getVendorMeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
 
 /**
  * @summary Get service status
@@ -68,7 +233,7 @@ export const getGetStatusQueryKey = () => {
     }
 
 
-export const getGetStatusQueryOptions = <TData = Awaited<ReturnType<typeof getStatus>>, TError = StatusResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus>>, TError, TData>>, }
+export const getGetStatusQueryOptions = <TData = Awaited<ReturnType<typeof getStatus>>, TError = ErrorType<StatusResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
@@ -87,11 +252,11 @@ const {query: queryOptions} = options ?? {};
 }
 
 export type GetStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getStatus>>>
-export type GetStatusQueryError = StatusResponse
+export type GetStatusQueryError = ErrorType<StatusResponse>
 
 
 /** @summary Get service status */
-export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TError = StatusResponse>(
+export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TError = ErrorType<StatusResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getStatus>>,
@@ -102,7 +267,7 @@ export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TErr
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary Get service status */
-export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TError = StatusResponse>(
+export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TError = ErrorType<StatusResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getStatus>>,
@@ -113,12 +278,12 @@ export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TErr
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary Get service status */
-export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TError = StatusResponse>(
+export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TError = ErrorType<StatusResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary Get service status */
-export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TError = StatusResponse>(
+export function useGetStatus<TData = Awaited<ReturnType<typeof getStatus>>, TError = ErrorType<StatusResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatus>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

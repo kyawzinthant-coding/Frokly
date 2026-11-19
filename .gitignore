@@ -33,8 +33,8 @@ docker/.env.*
 *~
 .DS_Store
 
-# Dependencies
-vendor/
+# Dependencies (Go vendor dir only — a bare `vendor/` also hid frontend/app/vendor)
+/backend/vendor/
 
 # Test coverage
 *.coverage
@@ -68,8 +68,12 @@ build/
 *.tar.gz
 *.zip
 
-# Local mentor/context notes (not for other contributors)
+# AI assistant files (local only)
 CLAUDE.md
+AGENTS.md
+.claude/
+.cursor/
+.cursorrules
 
 # Local files
 amy-admin/

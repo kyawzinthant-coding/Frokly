@@ -15,7 +15,8 @@ export default function Home() {
 
       {isError && (
         <p className="text-red-600">
-          Backend unhealthy: {error.status} (database: {error.database})
+          Backend unhealthy: {error.response?.data.status ?? error.message}{" "}
+          (database: {error.response?.data.database ?? "unknown"})
         </p>
       )}
 
