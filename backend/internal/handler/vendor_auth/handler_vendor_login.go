@@ -5,9 +5,7 @@ import (
 	"errors"
 	"github.com/kyawzinthant-coding/froky/api"
 	"github.com/kyawzinthant-coding/froky/internal/service/auth"
-	"github.com/kyawzinthant-coding/froky/internal/types"
 	"github.com/rs/zerolog/log"
-	"net/http"
 	"strings"
 )
 
@@ -31,15 +29,7 @@ func (h *VendorAuthHandler) VendorLogin(ctx context.Context, request api.VendorL
 		return nil, err
 	}
 
-	cookie := (&http.Cookie{
-		Name:     types.VendorCookiesName,
-		Value:    token,
-		Path:     "/",
-		MaxAge:   int(h.tokenTTL.Seconds()),
-		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
-	}).String()
+	cookie := vendorCookie(token, int(h.tokenTTL.Seconds()))
 
 	return api.VendorLogin200JSONResponse{
 		Body: api.VendorResponse{

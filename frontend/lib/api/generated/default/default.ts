@@ -117,6 +117,69 @@ export const useVendorLogin = <TError = ErrorType<ErrorResponse>,
       return useMutation(getVendorLoginMutationOptions(options), queryClient);
     }
     /**
+ * @summary Vendor staff logout
+ */
+export const vendorLogout = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/v1/vendor/logout`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getVendorLogoutMutationKey = () => ['vendorLogout'] as const;
+
+export const getVendorLogoutMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof vendorLogout>>, TError,void, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof vendorLogout>>, TError,void, TContext> => {
+
+const mutationKey = getVendorLogoutMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof vendorLogout>>, void> = () => {
+
+
+          return  vendorLogout()
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type VendorLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof vendorLogout>>>
+
+    export type VendorLogoutMutationError = ErrorType<unknown>
+
+
+    /** @summary Vendor staff logout */
+export const useVendorLogout = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof vendorLogout>>, TError,void, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof vendorLogout>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getVendorLogoutMutationOptions(options), queryClient);
+    }
+    /**
  * @summary Get the currently authenticated vendor's profile
  */
 export const vendorMe = (

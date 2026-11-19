@@ -59,6 +59,9 @@ type ServerInterface interface {
 	// VendorLogin Vendor staff login
 	// (POST /v1/vendor/login)
 	VendorLogin(w http.ResponseWriter, r *http.Request)
+	// VendorLogout Vendor staff logout
+	// (POST /v1/vendor/logout)
+	VendorLogout(w http.ResponseWriter, r *http.Request)
 	// VendorMe Get the currently authenticated vendor's profile
 	// (GET /v1/vendor/me)
 	VendorMe(w http.ResponseWriter, r *http.Request)
@@ -77,6 +80,12 @@ func (_ Unimplemented) GetStatus(w http.ResponseWriter, r *http.Request) {
 // VendorLogin Vendor staff login
 // (POST /v1/vendor/login)
 func (_ Unimplemented) VendorLogin(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// VendorLogout Vendor staff logout
+// (POST /v1/vendor/logout)
+func (_ Unimplemented) VendorLogout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -114,6 +123,20 @@ func (siw *ServerInterfaceWrapper) VendorLogin(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.VendorLogin(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// VendorLogout operation middleware
+func (siw *ServerInterfaceWrapper) VendorLogout(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.VendorLogout(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -254,6 +277,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/v1/vendor/login", wrapper.VendorLogin)
 	})
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/v1/vendor/logout", wrapper.VendorLogout)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/v1/vendor/me", wrapper.VendorMe)
 	})
 	r.Group(func(r chi.Router) {
@@ -344,6 +370,29 @@ func (response VendorLogin401JSONResponse) VisitVendorLoginResponse(w http.Respo
 	return err
 }
 
+type VendorLogoutRequestObject struct {
+}
+
+type VendorLogoutResponseObject interface {
+	VisitVendorLogoutResponse(w http.ResponseWriter) error
+}
+
+type VendorLogout204ResponseHeaders struct {
+	SetCookie *string
+}
+
+type VendorLogout204Response struct {
+	Headers VendorLogout204ResponseHeaders
+}
+
+func (response VendorLogout204Response) VisitVendorLogoutResponse(w http.ResponseWriter) error {
+	if response.Headers.SetCookie != nil {
+		w.Header().Set("Set-Cookie", fmt.Sprint(*response.Headers.SetCookie))
+	}
+	w.WriteHeader(204)
+	return nil
+}
+
 type VendorMeRequestObject struct {
 }
 
@@ -387,6 +436,9 @@ type StrictServerInterface interface {
 	// VendorLogin Vendor staff login
 	// (POST /v1/vendor/login)
 	VendorLogin(ctx context.Context, request VendorLoginRequestObject) (VendorLoginResponseObject, error)
+	// VendorLogout Vendor staff logout
+	// (POST /v1/vendor/logout)
+	VendorLogout(ctx context.Context, request VendorLogoutRequestObject) (VendorLogoutResponseObject, error)
 	// VendorMe Get the currently authenticated vendor's profile
 	// (GET /v1/vendor/me)
 	VendorMe(ctx context.Context, request VendorMeRequestObject) (VendorMeResponseObject, error)
@@ -479,6 +531,30 @@ func (sh *strictHandler) VendorLogin(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(VendorLoginResponseObject); ok {
 		if err := validResponse.VisitVendorLoginResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// VendorLogout operation middleware
+func (sh *strictHandler) VendorLogout(w http.ResponseWriter, r *http.Request) {
+	var request VendorLogoutRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.VendorLogout(ctx, request.(VendorLogoutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "VendorLogout")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(VendorLogoutResponseObject); ok {
+		if err := validResponse.VisitVendorLogoutResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

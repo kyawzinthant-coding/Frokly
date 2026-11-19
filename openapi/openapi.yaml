@@ -35,6 +35,18 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /v1/vendor/logout:
+    post:
+      operationId: vendorLogout
+      summary: Vendor staff logout
+      responses:
+        "204":
+          description: Logged out; session cookie cleared via Set-Cookie header
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+
   /v1/vendor/me:
     get:
       operationId: vendorMe
