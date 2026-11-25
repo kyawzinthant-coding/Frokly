@@ -263,6 +263,41 @@ paths:
         "404":
           $ref: "#/components/responses/ProductNotFound"
 
+  /v1/vendors:
+    get:
+      operationId: listPublicVendors
+      security: []
+      summary: List the stalls in the food court, for customers
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PublicVendor"
+
+  /v1/vendors/{vendorId}/menu:
+    parameters:
+      - $ref: "#/components/parameters/VendorId"
+    get:
+      operationId: getPublicVendorMenu
+      security: []
+      summary: A stall's menu for customers, only items on sale
+      description: >
+        Categories with no item on sale are left out. Archived categories and items,
+        and items that are not on sale, are never returned.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicMenu"
+        "404":
+          $ref: "#/components/responses/VendorNotFound"
+
   /v1/status:
     get:
       operationId: getStatus
@@ -284,6 +319,13 @@ paths:
 
 components:
   parameters:
+    VendorId:
+      name: vendorId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
     ProductId:
       name: productId
       in: path
@@ -300,6 +342,12 @@ components:
         format: int64
 
   responses:
+    VendorNotFound:
+      description: No stall with this id
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
     BadRequest:
       description: Invalid request body
       content:
@@ -361,6 +409,82 @@ components:
       required:
         - username
         - password
+
+    # Customer-facing schemas: only what a customer may see. Never reuse the vendor-side
+    # schemas here, so a field added for vendors can't become public by accident.
+    PublicVendor:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Khun Mae Noodles
+        logoUrl:
+          type: string
+          nullable: true
+      required:
+        - id
+        - name
+        - logoUrl
+
+    PublicMenu:
+      type: object
+      properties:
+        vendor:
+          $ref: "#/components/schemas/PublicVendor"
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicMenuCategory"
+      required:
+        - vendor
+        - categories
+
+    PublicMenuCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Noodle Soups
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublicMenuItem"
+      required:
+        - id
+        - name
+        - items
+
+    PublicMenuItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Tom Yum Noodles
+        description:
+          type: string
+        price:
+          type: integer
+          format: int64
+          description: Price in satang
+          example: 7000
+        imageUrl:
+          type: string
+          nullable: true
+      required:
+        - id
+        - name
+        - description
+        - price
+        - imageUrl
 
     VendorResponse:
       type: object

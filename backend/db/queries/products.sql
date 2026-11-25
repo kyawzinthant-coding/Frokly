@@ -35,3 +35,8 @@ RETURNING *;
 UPDATE products
 SET archived_at = NOW(), updated_at = NOW()
 WHERE id = @id AND vendor_id = @vendor_id AND archived_at IS NULL;
+
+-- name: ListAvailableProductsByVendor :many
+SELECT * FROM products
+WHERE vendor_id = @vendor_id AND is_available AND archived_at IS NULL
+ORDER BY name;

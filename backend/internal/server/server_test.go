@@ -27,6 +27,8 @@ func TestRequireVendorAuth_FollowsSpecSecurity(t *testing.T) {
 		{http.MethodGet, "/v1/status", http.StatusNotImplemented},
 		{http.MethodPost, "/v1/vendor/login", http.StatusNotImplemented},
 		{http.MethodPost, "/v1/vendor/logout", http.StatusNotImplemented},
+		{http.MethodGet, "/v1/vendors", http.StatusNotImplemented},
+		{http.MethodGet, "/v1/vendors/1/menu", http.StatusNotImplemented},
 		{http.MethodGet, "/v1/vendor/me", http.StatusUnauthorized},
 		{http.MethodGet, "/v1/vendor/products", http.StatusUnauthorized},
 		{http.MethodGet, "/v1/vendor/products/1", http.StatusUnauthorized},

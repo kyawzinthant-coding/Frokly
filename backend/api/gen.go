@@ -68,6 +68,45 @@ type ProductRequest struct {
 	Price int64 `json:"price"`
 }
 
+// PublicMenu defines model for PublicMenu.
+type PublicMenu struct {
+	Categories []PublicMenuCategory `json:"categories"`
+	Vendor     PublicVendor         `json:"vendor"`
+}
+
+// PublicMenuCategory defines model for PublicMenuCategory.
+type PublicMenuCategory struct {
+	Id    int64            `json:"id"`
+	Items []PublicMenuItem `json:"items"`
+
+	// Name Example: Noodle Soups
+	Name string `json:"name"`
+}
+
+// PublicMenuItem defines model for PublicMenuItem.
+type PublicMenuItem struct {
+	Description string  `json:"description"`
+	Id          int64   `json:"id"`
+	ImageUrl    *string `json:"imageUrl"`
+
+	// Name Example: Tom Yum Noodles
+	Name string `json:"name"`
+
+	// Price Price in satang
+	//
+	// Example: 7000
+	Price int64 `json:"price"`
+}
+
+// PublicVendor defines model for PublicVendor.
+type PublicVendor struct {
+	Id      int64   `json:"id"`
+	LogoUrl *string `json:"logoUrl"`
+
+	// Name Example: Khun Mae Noodles
+	Name string `json:"name"`
+}
+
 // StatusResponse defines model for StatusResponse.
 type StatusResponse struct {
 	// Database Example: ok
@@ -103,6 +142,9 @@ type CategoryId = int64
 // ProductId defines model for ProductId.
 type ProductId = int64
 
+// VendorId defines model for VendorId.
+type VendorId = int64
+
 // BadRequest defines model for BadRequest.
 type BadRequest = ErrorResponse
 
@@ -123,6 +165,9 @@ type ProductNotFound = ErrorResponse
 
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = ErrorResponse
+
+// VendorNotFound defines model for VendorNotFound.
+type VendorNotFound = ErrorResponse
 
 // vendorCookieAuthContextKey is the context key for vendorCookieAuth security scheme
 type vendorCookieAuthContextKey string
@@ -186,6 +231,12 @@ type ServerInterface interface {
 	// UpdateVendorProduct Replace all fields of one of the logged-in vendor's products
 	// (PUT /v1/vendor/products/{productId})
 	UpdateVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId)
+	// ListPublicVendors List the stalls in the food court, for customers
+	// (GET /v1/vendors)
+	ListPublicVendors(w http.ResponseWriter, r *http.Request)
+	// GetPublicVendorMenu A stall's menu for customers, only items on sale
+	// (GET /v1/vendors/{vendorId}/menu)
+	GetPublicVendorMenu(w http.ResponseWriter, r *http.Request, vendorId VendorId)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -273,6 +324,18 @@ func (_ Unimplemented) GetVendorProduct(w http.ResponseWriter, r *http.Request, 
 // UpdateVendorProduct Replace all fields of one of the logged-in vendor's products
 // (PUT /v1/vendor/products/{productId})
 func (_ Unimplemented) UpdateVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListPublicVendors List the stalls in the food court, for customers
+// (GET /v1/vendors)
+func (_ Unimplemented) ListPublicVendors(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetPublicVendorMenu A stall's menu for customers, only items on sale
+// (GET /v1/vendors/{vendorId}/menu)
+func (_ Unimplemented) GetPublicVendorMenu(w http.ResponseWriter, r *http.Request, vendorId VendorId) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -619,6 +682,46 @@ func (siw *ServerInterfaceWrapper) UpdateVendorProduct(w http.ResponseWriter, r 
 	handler.ServeHTTP(w, r)
 }
 
+// ListPublicVendors operation middleware
+func (siw *ServerInterfaceWrapper) ListPublicVendors(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListPublicVendors(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetPublicVendorMenu operation middleware
+func (siw *ServerInterfaceWrapper) GetPublicVendorMenu(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "vendorId" -------------
+	var vendorId VendorId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "vendorId", chi.URLParam(r, "vendorId"), &vendorId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "vendorId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPublicVendorMenu(w, r, vendorId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -772,6 +875,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Put(options.BaseURL+"/v1/vendor/products/{productId}", wrapper.UpdateVendorProduct)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/vendors", wrapper.ListPublicVendors)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/vendors/{vendorId}/menu", wrapper.GetPublicVendorMenu)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/v1/status", wrapper.GetStatus)
 	})
 
@@ -791,6 +900,8 @@ type ProductNameTakenJSONResponse ErrorResponse
 type ProductNotFoundJSONResponse ErrorResponse
 
 type UnauthorizedJSONResponse ErrorResponse
+
+type VendorNotFoundJSONResponse ErrorResponse
 
 type GetStatusRequestObject struct {
 }
@@ -1503,6 +1614,63 @@ func (response UpdateVendorProduct409JSONResponse) VisitUpdateVendorProductRespo
 	return err
 }
 
+type ListPublicVendorsRequestObject struct {
+}
+
+type ListPublicVendorsResponseObject interface {
+	VisitListPublicVendorsResponse(w http.ResponseWriter) error
+}
+
+type ListPublicVendors200JSONResponse []PublicVendor
+
+func (response ListPublicVendors200JSONResponse) VisitListPublicVendorsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPublicVendorMenuRequestObject struct {
+	VendorId VendorId `json:"vendorId"`
+}
+
+type GetPublicVendorMenuResponseObject interface {
+	VisitGetPublicVendorMenuResponse(w http.ResponseWriter) error
+}
+
+type GetPublicVendorMenu200JSONResponse PublicMenu
+
+func (response GetPublicVendorMenu200JSONResponse) VisitGetPublicVendorMenuResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetPublicVendorMenu404JSONResponse struct{ VendorNotFoundJSONResponse }
+
+func (response GetPublicVendorMenu404JSONResponse) VisitGetPublicVendorMenuResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// GetStatus Get service status
@@ -1547,6 +1715,12 @@ type StrictServerInterface interface {
 	// UpdateVendorProduct Replace all fields of one of the logged-in vendor's products
 	// (PUT /v1/vendor/products/{productId})
 	UpdateVendorProduct(ctx context.Context, request UpdateVendorProductRequestObject) (UpdateVendorProductResponseObject, error)
+	// ListPublicVendors List the stalls in the food court, for customers
+	// (GET /v1/vendors)
+	ListPublicVendors(ctx context.Context, request ListPublicVendorsRequestObject) (ListPublicVendorsResponseObject, error)
+	// GetPublicVendorMenu A stall's menu for customers, only items on sale
+	// (GET /v1/vendors/{vendorId}/menu)
+	GetPublicVendorMenu(ctx context.Context, request GetPublicVendorMenuRequestObject) (GetPublicVendorMenuResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -1964,6 +2138,56 @@ func (sh *strictHandler) UpdateVendorProduct(w http.ResponseWriter, r *http.Requ
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(UpdateVendorProductResponseObject); ok {
 		if err := validResponse.VisitUpdateVendorProductResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListPublicVendors operation middleware
+func (sh *strictHandler) ListPublicVendors(w http.ResponseWriter, r *http.Request) {
+	var request ListPublicVendorsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListPublicVendors(ctx, request.(ListPublicVendorsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListPublicVendors")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListPublicVendorsResponseObject); ok {
+		if err := validResponse.VisitListPublicVendorsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPublicVendorMenu operation middleware
+func (sh *strictHandler) GetPublicVendorMenu(w http.ResponseWriter, r *http.Request, vendorId VendorId) {
+	var request GetPublicVendorMenuRequestObject
+
+	request.VendorId = vendorId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPublicVendorMenu(ctx, request.(GetPublicVendorMenuRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPublicVendorMenu")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPublicVendorMenuResponseObject); ok {
+		if err := validResponse.VisitGetPublicVendorMenuResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
