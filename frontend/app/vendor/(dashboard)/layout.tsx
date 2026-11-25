@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useVendorMe } from "@/lib/api/generated";
 import { Wordmark } from "@/components/brand/wordmark";
 import { AccountMenu } from "@/components/vendor/account-menu";
+import { RailNav, TabBarNav } from "@/components/vendor/vendor-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Auth guard + shell for every vendor page except login. The API is on another origin, so the
@@ -31,10 +32,17 @@ export default function VendorDashboardLayout({ children }: { children: React.Re
           ) : (
             <Skeleton className="h-5 w-32 bg-primary-foreground/20" />
           )}
-          <div className="ml-auto">{me.data && <AccountMenu username={me.data.username} />}</div>
+          <div className="ml-auto flex items-center gap-3">
+            <RailNav />
+            {me.data && <AccountMenu username={me.data.username} />}
+          </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+      {/* Bottom padding on phones keeps content clear of the fixed tab bar. */}
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-28 sm:px-6 sm:pt-8 md:pb-8">
+        {children}
+      </main>
+      <TabBarNav />
     </div>
   );
 }

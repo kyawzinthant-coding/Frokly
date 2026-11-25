@@ -5,7 +5,18 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './badRequestResponse';
+export * from './category';
+export * from './categoryNameTakenResponse';
+export * from './categoryNotEmptyResponse';
+export * from './categoryNotFoundResponse';
+export * from './categoryRequest';
 export * from './errorResponse';
+export * from './product';
+export * from './productNameTakenResponse';
+export * from './productNotFoundResponse';
+export * from './productRequest';
 export * from './statusResponse';
+export * from './unauthorizedResponse';
 export * from './vendorLoginRequest';
 export * from './vendorResponse';

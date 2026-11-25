@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "gen-api": "orval --config orval.config.ts"
+    "gen-api": "orval --config orval.config.ts",
+    "test": "node --test"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

@@ -24,8 +24,19 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BadRequestResponse,
+  Category,
+  CategoryNameTakenResponse,
+  CategoryNotEmptyResponse,
+  CategoryNotFoundResponse,
+  CategoryRequest,
   ErrorResponse,
+  Product,
+  ProductNameTakenResponse,
+  ProductNotFoundResponse,
+  ProductRequest,
   StatusResponse,
+  UnauthorizedResponse,
   VendorLoginRequest,
   VendorResponse
 } from '../models';
@@ -272,6 +283,762 @@ export function useVendorMe<TData = Awaited<ReturnType<typeof vendorMe>>, TError
 
 
 /**
+ * @summary List the logged-in vendor's menu categories
+ */
+export const listVendorCategories = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Category[]>(
+      {url: `/v1/vendor/categories`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getListVendorCategoriesQueryKey = () => {
+    return [
+    `/v1/vendor/categories`
+    ] as const;
+    }
+
+
+export const getListVendorCategoriesQueryOptions = <TData = Awaited<ReturnType<typeof listVendorCategories>>, TError = ErrorType<UnauthorizedResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorCategories>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListVendorCategoriesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listVendorCategories>>> = ({ signal }) => listVendorCategories(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listVendorCategories>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListVendorCategoriesQueryResult = NonNullable<Awaited<ReturnType<typeof listVendorCategories>>>
+export type ListVendorCategoriesQueryError = ErrorType<UnauthorizedResponse>
+
+
+/** @summary List the logged-in vendor's menu categories */
+export function useListVendorCategories<TData = Awaited<ReturnType<typeof listVendorCategories>>, TError = ErrorType<UnauthorizedResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorCategories>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listVendorCategories>>,
+          TError,
+          Awaited<ReturnType<typeof listVendorCategories>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary List the logged-in vendor's menu categories */
+export function useListVendorCategories<TData = Awaited<ReturnType<typeof listVendorCategories>>, TError = ErrorType<UnauthorizedResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorCategories>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listVendorCategories>>,
+          TError,
+          Awaited<ReturnType<typeof listVendorCategories>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary List the logged-in vendor's menu categories */
+export function useListVendorCategories<TData = Awaited<ReturnType<typeof listVendorCategories>>, TError = ErrorType<UnauthorizedResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorCategories>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary List the logged-in vendor's menu categories */
+export function useListVendorCategories<TData = Awaited<ReturnType<typeof listVendorCategories>>, TError = ErrorType<UnauthorizedResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorCategories>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListVendorCategoriesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Create a menu category for the logged-in vendor
+ */
+export const createVendorCategory = (
+    categoryRequest: CategoryRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Category>(
+      {url: `/v1/vendor/categories`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: categoryRequest, signal
+    },
+      );
+    }
+
+
+
+
+export const getCreateVendorCategoryMutationKey = () => ['createVendorCategory'] as const;
+
+export const getCreateVendorCategoryMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | CategoryNameTakenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVendorCategory>>, TError,CreateVendorCategoryMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createVendorCategory>>, TError,CreateVendorCategoryMutationVariables, TContext> => {
+
+const mutationKey = getCreateVendorCategoryMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createVendorCategory>>, CreateVendorCategoryMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createVendorCategory(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateVendorCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof createVendorCategory>>>
+    export type CreateVendorCategoryMutationBody = CategoryRequest
+    export type CreateVendorCategoryMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | CategoryNameTakenResponse>
+    export type CreateVendorCategoryMutationVariables = {data: CategoryRequest}
+
+    /** @summary Create a menu category for the logged-in vendor */
+export const useCreateVendorCategory = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | CategoryNameTakenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVendorCategory>>, TError,CreateVendorCategoryMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createVendorCategory>>,
+        TError,
+        CreateVendorCategoryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateVendorCategoryMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Get one of the logged-in vendor's menu categories
+ */
+export const getVendorCategory = (
+    categoryId: number,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Category>(
+      {url: `/v1/vendor/categories/${categoryId}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetVendorCategoryQueryKey = (categoryId: number,) => {
+    return [
+    `/v1/vendor/categories/${categoryId}`
+    ] as const;
+    }
+
+
+export const getGetVendorCategoryQueryOptions = <TData = Awaited<ReturnType<typeof getVendorCategory>>, TError = ErrorType<UnauthorizedResponse | CategoryNotFoundResponse>>(categoryId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorCategory>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetVendorCategoryQueryKey(categoryId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getVendorCategory>>> = ({ signal }) => getVendorCategory(categoryId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: categoryId !== null && categoryId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getVendorCategory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetVendorCategoryQueryResult = NonNullable<Awaited<ReturnType<typeof getVendorCategory>>>
+export type GetVendorCategoryQueryError = ErrorType<UnauthorizedResponse | CategoryNotFoundResponse>
+
+
+/** @summary Get one of the logged-in vendor's menu categories */
+export function useGetVendorCategory<TData = Awaited<ReturnType<typeof getVendorCategory>>, TError = ErrorType<UnauthorizedResponse | CategoryNotFoundResponse>>(
+ categoryId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorCategory>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVendorCategory>>,
+          TError,
+          Awaited<ReturnType<typeof getVendorCategory>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Get one of the logged-in vendor's menu categories */
+export function useGetVendorCategory<TData = Awaited<ReturnType<typeof getVendorCategory>>, TError = ErrorType<UnauthorizedResponse | CategoryNotFoundResponse>>(
+ categoryId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorCategory>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVendorCategory>>,
+          TError,
+          Awaited<ReturnType<typeof getVendorCategory>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Get one of the logged-in vendor's menu categories */
+export function useGetVendorCategory<TData = Awaited<ReturnType<typeof getVendorCategory>>, TError = ErrorType<UnauthorizedResponse | CategoryNotFoundResponse>>(
+ categoryId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorCategory>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Get one of the logged-in vendor's menu categories */
+export function useGetVendorCategory<TData = Awaited<ReturnType<typeof getVendorCategory>>, TError = ErrorType<UnauthorizedResponse | CategoryNotFoundResponse>>(
+ categoryId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorCategory>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetVendorCategoryQueryOptions(categoryId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Rename one of the logged-in vendor's menu categories
+ */
+export const updateVendorCategory = (
+    categoryId: number,
+    categoryRequest: CategoryRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Category>(
+      {url: `/v1/vendor/categories/${categoryId}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: categoryRequest, signal
+    },
+      );
+    }
+
+
+
+
+export const getUpdateVendorCategoryMutationKey = () => ['updateVendorCategory'] as const;
+
+export const getUpdateVendorCategoryMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | CategoryNotFoundResponse | CategoryNameTakenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVendorCategory>>, TError,UpdateVendorCategoryMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateVendorCategory>>, TError,UpdateVendorCategoryMutationVariables, TContext> => {
+
+const mutationKey = getUpdateVendorCategoryMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateVendorCategory>>, UpdateVendorCategoryMutationVariables> = (props) => {
+          const {categoryId,data} = props ?? {};
+
+          return  updateVendorCategory(categoryId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateVendorCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof updateVendorCategory>>>
+    export type UpdateVendorCategoryMutationBody = CategoryRequest
+    export type UpdateVendorCategoryMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | CategoryNotFoundResponse | CategoryNameTakenResponse>
+    export type UpdateVendorCategoryMutationVariables = {categoryId: number;data: CategoryRequest}
+
+    /** @summary Rename one of the logged-in vendor's menu categories */
+export const useUpdateVendorCategory = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | CategoryNotFoundResponse | CategoryNameTakenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVendorCategory>>, TError,UpdateVendorCategoryMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateVendorCategory>>,
+        TError,
+        UpdateVendorCategoryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateVendorCategoryMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Archive one of the logged-in vendor's menu categories (must have no active products)
+ */
+export const deleteVendorCategory = (
+    categoryId: number,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/v1/vendor/categories/${categoryId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+
+export const getDeleteVendorCategoryMutationKey = () => ['deleteVendorCategory'] as const;
+
+export const getDeleteVendorCategoryMutationOptions = <TError = ErrorType<UnauthorizedResponse | CategoryNotFoundResponse | CategoryNotEmptyResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVendorCategory>>, TError,DeleteVendorCategoryMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteVendorCategory>>, TError,DeleteVendorCategoryMutationVariables, TContext> => {
+
+const mutationKey = getDeleteVendorCategoryMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteVendorCategory>>, DeleteVendorCategoryMutationVariables> = (props) => {
+          const {categoryId} = props ?? {};
+
+          return  deleteVendorCategory(categoryId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteVendorCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof deleteVendorCategory>>>
+
+    export type DeleteVendorCategoryMutationError = ErrorType<UnauthorizedResponse | CategoryNotFoundResponse | CategoryNotEmptyResponse>
+    export type DeleteVendorCategoryMutationVariables = {categoryId: number}
+
+    /** @summary Archive one of the logged-in vendor's menu categories (must have no active products) */
+export const useDeleteVendorCategory = <TError = ErrorType<UnauthorizedResponse | CategoryNotFoundResponse | CategoryNotEmptyResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVendorCategory>>, TError,DeleteVendorCategoryMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteVendorCategory>>,
+        TError,
+        DeleteVendorCategoryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteVendorCategoryMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary List the logged-in vendor's products, including unavailable ones
+ */
+export const listVendorProducts = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Product[]>(
+      {url: `/v1/vendor/products`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getListVendorProductsQueryKey = () => {
+    return [
+    `/v1/vendor/products`
+    ] as const;
+    }
+
+
+export const getListVendorProductsQueryOptions = <TData = Awaited<ReturnType<typeof listVendorProducts>>, TError = ErrorType<UnauthorizedResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorProducts>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListVendorProductsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listVendorProducts>>> = ({ signal }) => listVendorProducts(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listVendorProducts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListVendorProductsQueryResult = NonNullable<Awaited<ReturnType<typeof listVendorProducts>>>
+export type ListVendorProductsQueryError = ErrorType<UnauthorizedResponse>
+
+
+/** @summary List the logged-in vendor's products, including unavailable ones */
+export function useListVendorProducts<TData = Awaited<ReturnType<typeof listVendorProducts>>, TError = ErrorType<UnauthorizedResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorProducts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listVendorProducts>>,
+          TError,
+          Awaited<ReturnType<typeof listVendorProducts>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary List the logged-in vendor's products, including unavailable ones */
+export function useListVendorProducts<TData = Awaited<ReturnType<typeof listVendorProducts>>, TError = ErrorType<UnauthorizedResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorProducts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listVendorProducts>>,
+          TError,
+          Awaited<ReturnType<typeof listVendorProducts>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary List the logged-in vendor's products, including unavailable ones */
+export function useListVendorProducts<TData = Awaited<ReturnType<typeof listVendorProducts>>, TError = ErrorType<UnauthorizedResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorProducts>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary List the logged-in vendor's products, including unavailable ones */
+export function useListVendorProducts<TData = Awaited<ReturnType<typeof listVendorProducts>>, TError = ErrorType<UnauthorizedResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVendorProducts>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListVendorProductsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Create a product for the logged-in vendor
+ */
+export const createVendorProduct = (
+    productRequest: ProductRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Product>(
+      {url: `/v1/vendor/products`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: productRequest, signal
+    },
+      );
+    }
+
+
+
+
+export const getCreateVendorProductMutationKey = () => ['createVendorProduct'] as const;
+
+export const getCreateVendorProductMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ErrorResponse | ProductNameTakenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVendorProduct>>, TError,CreateVendorProductMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof createVendorProduct>>, TError,CreateVendorProductMutationVariables, TContext> => {
+
+const mutationKey = getCreateVendorProductMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createVendorProduct>>, CreateVendorProductMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createVendorProduct(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateVendorProductMutationResult = NonNullable<Awaited<ReturnType<typeof createVendorProduct>>>
+    export type CreateVendorProductMutationBody = ProductRequest
+    export type CreateVendorProductMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ErrorResponse | ProductNameTakenResponse>
+    export type CreateVendorProductMutationVariables = {data: ProductRequest}
+
+    /** @summary Create a product for the logged-in vendor */
+export const useCreateVendorProduct = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ErrorResponse | ProductNameTakenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVendorProduct>>, TError,CreateVendorProductMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createVendorProduct>>,
+        TError,
+        CreateVendorProductMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateVendorProductMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Get one of the logged-in vendor's products
+ */
+export const getVendorProduct = (
+    productId: number,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Product>(
+      {url: `/v1/vendor/products/${productId}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getGetVendorProductQueryKey = (productId: number,) => {
+    return [
+    `/v1/vendor/products/${productId}`
+    ] as const;
+    }
+
+
+export const getGetVendorProductQueryOptions = <TData = Awaited<ReturnType<typeof getVendorProduct>>, TError = ErrorType<UnauthorizedResponse | ProductNotFoundResponse>>(productId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorProduct>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetVendorProductQueryKey(productId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getVendorProduct>>> = ({ signal }) => getVendorProduct(productId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: productId !== null && productId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getVendorProduct>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetVendorProductQueryResult = NonNullable<Awaited<ReturnType<typeof getVendorProduct>>>
+export type GetVendorProductQueryError = ErrorType<UnauthorizedResponse | ProductNotFoundResponse>
+
+
+/** @summary Get one of the logged-in vendor's products */
+export function useGetVendorProduct<TData = Awaited<ReturnType<typeof getVendorProduct>>, TError = ErrorType<UnauthorizedResponse | ProductNotFoundResponse>>(
+ productId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorProduct>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVendorProduct>>,
+          TError,
+          Awaited<ReturnType<typeof getVendorProduct>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Get one of the logged-in vendor's products */
+export function useGetVendorProduct<TData = Awaited<ReturnType<typeof getVendorProduct>>, TError = ErrorType<UnauthorizedResponse | ProductNotFoundResponse>>(
+ productId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorProduct>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getVendorProduct>>,
+          TError,
+          Awaited<ReturnType<typeof getVendorProduct>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Get one of the logged-in vendor's products */
+export function useGetVendorProduct<TData = Awaited<ReturnType<typeof getVendorProduct>>, TError = ErrorType<UnauthorizedResponse | ProductNotFoundResponse>>(
+ productId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorProduct>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Get one of the logged-in vendor's products */
+export function useGetVendorProduct<TData = Awaited<ReturnType<typeof getVendorProduct>>, TError = ErrorType<UnauthorizedResponse | ProductNotFoundResponse>>(
+ productId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getVendorProduct>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetVendorProductQueryOptions(productId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Replace all fields of one of the logged-in vendor's products
+ */
+export const updateVendorProduct = (
+    productId: number,
+    productRequest: ProductRequest,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<Product>(
+      {url: `/v1/vendor/products/${productId}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: productRequest, signal
+    },
+      );
+    }
+
+
+
+
+export const getUpdateVendorProductMutationKey = () => ['updateVendorProduct'] as const;
+
+export const getUpdateVendorProductMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ErrorResponse | ProductNameTakenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVendorProduct>>, TError,UpdateVendorProductMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof updateVendorProduct>>, TError,UpdateVendorProductMutationVariables, TContext> => {
+
+const mutationKey = getUpdateVendorProductMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateVendorProduct>>, UpdateVendorProductMutationVariables> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  updateVendorProduct(productId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateVendorProductMutationResult = NonNullable<Awaited<ReturnType<typeof updateVendorProduct>>>
+    export type UpdateVendorProductMutationBody = ProductRequest
+    export type UpdateVendorProductMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ErrorResponse | ProductNameTakenResponse>
+    export type UpdateVendorProductMutationVariables = {productId: number;data: ProductRequest}
+
+    /** @summary Replace all fields of one of the logged-in vendor's products */
+export const useUpdateVendorProduct = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ErrorResponse | ProductNameTakenResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVendorProduct>>, TError,UpdateVendorProductMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateVendorProduct>>,
+        TError,
+        UpdateVendorProductMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateVendorProductMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Delete one of the logged-in vendor's products
+ */
+export const deleteVendorProduct = (
+    productId: number,
+ signal?: AbortSignal
+) => {
+
+
+      return customInstance<void>(
+      {url: `/v1/vendor/products/${productId}`, method: 'DELETE', signal
+    },
+      );
+    }
+
+
+
+
+export const getDeleteVendorProductMutationKey = () => ['deleteVendorProduct'] as const;
+
+export const getDeleteVendorProductMutationOptions = <TError = ErrorType<UnauthorizedResponse | ProductNotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVendorProduct>>, TError,DeleteVendorProductMutationVariables, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof deleteVendorProduct>>, TError,DeleteVendorProductMutationVariables, TContext> => {
+
+const mutationKey = getDeleteVendorProductMutationKey();
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteVendorProduct>>, DeleteVendorProductMutationVariables> = (props) => {
+          const {productId} = props ?? {};
+
+          return  deleteVendorProduct(productId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteVendorProductMutationResult = NonNullable<Awaited<ReturnType<typeof deleteVendorProduct>>>
+
+    export type DeleteVendorProductMutationError = ErrorType<UnauthorizedResponse | ProductNotFoundResponse>
+    export type DeleteVendorProductMutationVariables = {productId: number}
+
+    /** @summary Delete one of the logged-in vendor's products */
+export const useDeleteVendorProduct = <TError = ErrorType<UnauthorizedResponse | ProductNotFoundResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVendorProduct>>, TError,DeleteVendorProductMutationVariables, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteVendorProduct>>,
+        TError,
+        DeleteVendorProductMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteVendorProductMutationOptions(options), queryClient);
+    }
+    /**
  * @summary Get service status
  */
 export const getStatus = (
