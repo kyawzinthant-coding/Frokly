@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	dbgen "github.com/kyawzinthant-coding/froky/db/generated"
+	"github.com/kyawzinthant-coding/froky/internal/nullable"
 	"github.com/kyawzinthant-coding/froky/internal/types"
 )
 
@@ -44,7 +45,7 @@ func (s *Service) CreateProduct(ctx context.Context, vendorID int64, in types.Pr
 	row, err := s.q.CreateProduct(ctx, dbgen.CreateProductParams{
 		Name:        in.Name,
 		Description: in.Description,
-		ProductUrl:  toNullString(in.ImageURL),
+		ProductUrl:  nullable.String(in.ImageURL),
 		Price:       in.Price,
 		IsAvailable: in.IsAvailable,
 		CategoryID:  in.CategoryID,
@@ -73,7 +74,7 @@ func (s *Service) UpdateProduct(ctx context.Context, vendorID, productID int64, 
 	row, err := s.q.UpdateProduct(ctx, dbgen.UpdateProductParams{
 		Name:        in.Name,
 		Description: in.Description,
-		ProductUrl:  toNullString(in.ImageURL),
+		ProductUrl:  nullable.String(in.ImageURL),
 		Price:       in.Price,
 		CategoryID:  in.CategoryID,
 		IsAvailable: in.IsAvailable,
@@ -110,25 +111,13 @@ func (s *Service) ArchiveProduct(ctx context.Context, vendorID, productID int64)
 }
 
 func toProduct(row dbgen.Product) types.Product {
-	var imageURL *string
-	if row.ProductUrl.Valid {
-		imageURL = &row.ProductUrl.String
-	}
-
 	return types.Product{
 		ID:          row.ID,
 		Name:        row.Name,
 		Description: row.Description,
 		Price:       row.Price,
-		ImageURL:    imageURL,
+		ImageURL:    nullable.StringPtr(row.ProductUrl),
 		CategoryID:  row.MenuCategoriesID,
 		IsAvailable: row.IsAvailable,
 	}
-}
-
-func toNullString(s *string) sql.NullString {
-	if s == nil {
-		return sql.NullString{}
-	}
-	return sql.NullString{String: *s, Valid: true}
 }

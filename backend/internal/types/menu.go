@@ -23,3 +23,10 @@ type ProductInput struct {
 	CategoryID  int64
 	IsAvailable bool
 }
+
+// MenuSection is one category of a customer-facing menu with the items on sale in it.
+type MenuSection struct {
+	ID    int64
+	Name  string
+	Items []Product
+}
