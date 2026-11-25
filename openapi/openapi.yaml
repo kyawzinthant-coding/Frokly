@@ -6,10 +6,15 @@ info:
 servers:
   - url: /
 
+# Every operation needs a vendor session unless it says `security: []`.
+security:
+  - vendorCookieAuth: []
+
 paths:
   /v1/vendor/login:
     post:
       operationId: vendorLogin
+      security: []
       summary: Vendor staff login
       requestBody:
         required: true
@@ -38,6 +43,7 @@ paths:
   /v1/vendor/logout:
     post:
       operationId: vendorLogout
+      security: []
       summary: Vendor staff logout
       responses:
         "204":
@@ -51,8 +57,6 @@ paths:
     get:
       operationId: vendorMe
       summary: Get the currently authenticated vendor's profile
-      security:
-        - vendorCookieAuth: []
       responses:
         "200":
           description: OK
@@ -71,8 +75,6 @@ paths:
     get:
       operationId: listVendorCategories
       summary: List the logged-in vendor's menu categories
-      security:
-        - vendorCookieAuth: []
       responses:
         "200":
           description: OK
@@ -87,8 +89,6 @@ paths:
     post:
       operationId: createVendorCategory
       summary: Create a menu category for the logged-in vendor
-      security:
-        - vendorCookieAuth: []
       requestBody:
         required: true
         content:
@@ -115,8 +115,6 @@ paths:
     get:
       operationId: getVendorCategory
       summary: Get one of the logged-in vendor's menu categories
-      security:
-        - vendorCookieAuth: []
       responses:
         "200":
           description: OK
@@ -131,8 +129,6 @@ paths:
     put:
       operationId: updateVendorCategory
       summary: Rename one of the logged-in vendor's menu categories
-      security:
-        - vendorCookieAuth: []
       requestBody:
         required: true
         content:
@@ -157,8 +153,6 @@ paths:
     delete:
       operationId: deleteVendorCategory
       summary: Archive one of the logged-in vendor's menu categories (must have no active products)
-      security:
-        - vendorCookieAuth: []
       responses:
         "204":
           description: Archived
@@ -173,8 +167,6 @@ paths:
     get:
       operationId: listVendorProducts
       summary: List the logged-in vendor's products, including unavailable ones
-      security:
-        - vendorCookieAuth: []
       responses:
         "200":
           description: OK
@@ -189,8 +181,6 @@ paths:
     post:
       operationId: createVendorProduct
       summary: Create a product for the logged-in vendor
-      security:
-        - vendorCookieAuth: []
       requestBody:
         required: true
         content:
@@ -223,8 +213,6 @@ paths:
     get:
       operationId: getVendorProduct
       summary: Get one of the logged-in vendor's products
-      security:
-        - vendorCookieAuth: []
       responses:
         "200":
           description: OK
@@ -239,8 +227,6 @@ paths:
     put:
       operationId: updateVendorProduct
       summary: Replace all fields of one of the logged-in vendor's products
-      security:
-        - vendorCookieAuth: []
       requestBody:
         required: true
         content:
@@ -269,8 +255,6 @@ paths:
     delete:
       operationId: deleteVendorProduct
       summary: Delete one of the logged-in vendor's products
-      security:
-        - vendorCookieAuth: []
       responses:
         "204":
           description: Deleted
@@ -282,6 +266,7 @@ paths:
   /v1/status:
     get:
       operationId: getStatus
+      security: []
       summary: Get service status
       responses:
         "200":

@@ -56,21 +56,16 @@ func NewHttpServer(
 		MaxAge:           300,
 	}))
 
-	publicRoutes := map[string]bool{
-		"GET /v1/status":         true,
-		"POST /v1/vendor/login":  true,
-		"POST /v1/vendor/logout": true,
-	}
-
-	r.Use(requireVendorAuth(publicRoutes, []byte(cfg.JWT.Secret)))
-
 	strict := api.NewStrictHandlerWithOptions(h, nil, api.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc:  handleRequestError,
 		ResponseErrorHandlerFunc: handleResponseError,
 	})
 
+	// Auth runs inside the generated router, after it has matched the operation,
+	// so it can tell from the spec whether that operation needs a session.
 	mux := api.HandlerWithOptions(strict, api.ChiServerOptions{
 		BaseRouter:       r,
+		Middlewares:      []api.MiddlewareFunc{requireVendorAuth([]byte(cfg.JWT.Secret))},
 		ErrorHandlerFunc: handleRequestError,
 	})
 
@@ -108,12 +103,14 @@ func (h *HttpServer) Start(lc fx.Lifecycle) error {
 	return nil
 }
 
-func requireVendorAuth(public map[string]bool, secret []byte) func(http.Handler) http.Handler {
+// The generated wrapper of every operation the spec protects puts VendorCookieAuthScopes
+// in the context before this runs; operations with `security: []` don't.
+func requireVendorAuth(secret []byte) api.MiddlewareFunc {
 	vendorAuth := authmw.VendorJwtAuth(secret)
 	return func(next http.Handler) http.Handler {
 		protected := vendorAuth(next)
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if public[r.Method+" "+r.URL.Path] {
+			if r.Context().Value(api.VendorCookieAuthScopes) == nil {
 				next.ServeHTTP(w, r)
 				return
 			}
