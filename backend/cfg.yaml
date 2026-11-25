@@ -3,4 +3,6 @@ generate:
   chi-server: true
   strict-server: true
   models: true
+compatibility:
+  enable-auth-scopes-on-context: true
 output: api/gen.go

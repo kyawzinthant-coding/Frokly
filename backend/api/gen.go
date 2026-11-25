@@ -14,6 +14,10 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
+const (
+	VendorCookieAuthScopes vendorCookieAuthContextKey = "vendorCookieAuth.Scopes"
+)
+
 // Category defines model for Category.
 type Category struct {
 	Id   int64  `json:"id"`
@@ -119,6 +123,9 @@ type ProductNotFound = ErrorResponse
 
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = ErrorResponse
+
+// vendorCookieAuthContextKey is the context key for vendorCookieAuth security scheme
+type vendorCookieAuthContextKey string
 
 // CreateVendorCategoryJSONRequestBody defines body for CreateVendorCategory for application/json ContentType.
 type CreateVendorCategoryJSONRequestBody = CategoryRequest
@@ -295,6 +302,12 @@ func (siw *ServerInterfaceWrapper) GetStatus(w http.ResponseWriter, r *http.Requ
 // ListVendorCategories operation middleware
 func (siw *ServerInterfaceWrapper) ListVendorCategories(w http.ResponseWriter, r *http.Request) {
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ListVendorCategories(w, r)
 	}))
@@ -308,6 +321,12 @@ func (siw *ServerInterfaceWrapper) ListVendorCategories(w http.ResponseWriter, r
 
 // CreateVendorCategory operation middleware
 func (siw *ServerInterfaceWrapper) CreateVendorCategory(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CreateVendorCategory(w, r)
@@ -335,6 +354,12 @@ func (siw *ServerInterfaceWrapper) DeleteVendorCategory(w http.ResponseWriter, r
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeleteVendorCategory(w, r, categoryId)
 	}))
@@ -361,6 +386,12 @@ func (siw *ServerInterfaceWrapper) GetVendorCategory(w http.ResponseWriter, r *h
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetVendorCategory(w, r, categoryId)
 	}))
@@ -386,6 +417,12 @@ func (siw *ServerInterfaceWrapper) UpdateVendorCategory(w http.ResponseWriter, r
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryId", Err: err})
 		return
 	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateVendorCategory(w, r, categoryId)
@@ -429,6 +466,12 @@ func (siw *ServerInterfaceWrapper) VendorLogout(w http.ResponseWriter, r *http.R
 // VendorMe operation middleware
 func (siw *ServerInterfaceWrapper) VendorMe(w http.ResponseWriter, r *http.Request) {
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.VendorMe(w, r)
 	}))
@@ -443,6 +486,12 @@ func (siw *ServerInterfaceWrapper) VendorMe(w http.ResponseWriter, r *http.Reque
 // ListVendorProducts operation middleware
 func (siw *ServerInterfaceWrapper) ListVendorProducts(w http.ResponseWriter, r *http.Request) {
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ListVendorProducts(w, r)
 	}))
@@ -456,6 +505,12 @@ func (siw *ServerInterfaceWrapper) ListVendorProducts(w http.ResponseWriter, r *
 
 // CreateVendorProduct operation middleware
 func (siw *ServerInterfaceWrapper) CreateVendorProduct(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.CreateVendorProduct(w, r)
@@ -483,6 +538,12 @@ func (siw *ServerInterfaceWrapper) DeleteVendorProduct(w http.ResponseWriter, r 
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeleteVendorProduct(w, r, productId)
 	}))
@@ -509,6 +570,12 @@ func (siw *ServerInterfaceWrapper) GetVendorProduct(w http.ResponseWriter, r *ht
 		return
 	}
 
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetVendorProduct(w, r, productId)
 	}))
@@ -534,6 +601,12 @@ func (siw *ServerInterfaceWrapper) UpdateVendorProduct(w http.ResponseWriter, r 
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productId", Err: err})
 		return
 	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, VendorCookieAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.UpdateVendorProduct(w, r, productId)
