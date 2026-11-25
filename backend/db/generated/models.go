@@ -17,11 +17,12 @@ type FoodCourt struct {
 }
 
 type MenuCategory struct {
-	ID        int64
-	Name      string
-	VendorID  int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID         int64
+	Name       string
+	VendorID   int64
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	ArchivedAt sql.NullTime
 }
 
 type Product struct {
@@ -29,12 +30,13 @@ type Product struct {
 	Name             string
 	Description      string
 	ProductUrl       sql.NullString
-	Price            int32
+	Price            int64
 	MenuCategoriesID int64
 	VendorID         int64
 	IsAvailable      bool
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
+	ArchivedAt       sql.NullTime
 }
 
 type User struct {

@@ -14,9 +14,54 @@ import (
 	"github.com/oapi-codegen/runtime"
 )
 
+// Category defines model for Category.
+type Category struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
+// CategoryRequest Used by both create and update. The vendor comes from the session, never the body.
+type CategoryRequest struct {
+	// Name Example: Noodles
+	Name string `json:"name"`
+}
+
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Error string `json:"error"`
+}
+
+// Product defines model for Product.
+type Product struct {
+	CategoryId  int64   `json:"categoryId"`
+	Description string  `json:"description"`
+	Id          int64   `json:"id"`
+	ImageUrl    *string `json:"imageUrl"`
+	IsAvailable bool    `json:"isAvailable"`
+	Name        string  `json:"name"`
+
+	// Price Price in the smallest currency unit (satang), never a float
+	//
+	// Example: 6500
+	Price int64 `json:"price"`
+}
+
+// ProductRequest Used by both create and update. The vendor comes from the session, never the body.
+type ProductRequest struct {
+	CategoryId int64 `json:"categoryId"`
+
+	// Description Example: Rice noodles with egg and peanuts
+	Description string  `json:"description"`
+	ImageUrl    *string `json:"imageUrl,omitempty"`
+	IsAvailable bool    `json:"isAvailable"`
+
+	// Name Example: Pad Thai
+	Name string `json:"name"`
+
+	// Price Price in the smallest currency unit (satang)
+	//
+	// Example: 6500
+	Price int64 `json:"price"`
 }
 
 // StatusResponse defines model for StatusResponse.
@@ -48,14 +93,68 @@ type VendorResponse struct {
 	Username string `json:"username"`
 }
 
+// CategoryId defines model for CategoryId.
+type CategoryId = int64
+
+// ProductId defines model for ProductId.
+type ProductId = int64
+
+// BadRequest defines model for BadRequest.
+type BadRequest = ErrorResponse
+
+// CategoryNameTaken defines model for CategoryNameTaken.
+type CategoryNameTaken = ErrorResponse
+
+// CategoryNotEmpty defines model for CategoryNotEmpty.
+type CategoryNotEmpty = ErrorResponse
+
+// CategoryNotFound defines model for CategoryNotFound.
+type CategoryNotFound = ErrorResponse
+
+// ProductNameTaken defines model for ProductNameTaken.
+type ProductNameTaken = ErrorResponse
+
+// ProductNotFound defines model for ProductNotFound.
+type ProductNotFound = ErrorResponse
+
+// Unauthorized defines model for Unauthorized.
+type Unauthorized = ErrorResponse
+
+// CreateVendorCategoryJSONRequestBody defines body for CreateVendorCategory for application/json ContentType.
+type CreateVendorCategoryJSONRequestBody = CategoryRequest
+
+// UpdateVendorCategoryJSONRequestBody defines body for UpdateVendorCategory for application/json ContentType.
+type UpdateVendorCategoryJSONRequestBody = CategoryRequest
+
 // VendorLoginJSONRequestBody defines body for VendorLogin for application/json ContentType.
 type VendorLoginJSONRequestBody = VendorLoginRequest
+
+// CreateVendorProductJSONRequestBody defines body for CreateVendorProduct for application/json ContentType.
+type CreateVendorProductJSONRequestBody = ProductRequest
+
+// UpdateVendorProductJSONRequestBody defines body for UpdateVendorProduct for application/json ContentType.
+type UpdateVendorProductJSONRequestBody = ProductRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// GetStatus Get service status
 	// (GET /v1/status)
 	GetStatus(w http.ResponseWriter, r *http.Request)
+	// ListVendorCategories List the logged-in vendor's menu categories
+	// (GET /v1/vendor/categories)
+	ListVendorCategories(w http.ResponseWriter, r *http.Request)
+	// CreateVendorCategory Create a menu category for the logged-in vendor
+	// (POST /v1/vendor/categories)
+	CreateVendorCategory(w http.ResponseWriter, r *http.Request)
+	// DeleteVendorCategory Archive one of the logged-in vendor's menu categories (must have no active products)
+	// (DELETE /v1/vendor/categories/{categoryId})
+	DeleteVendorCategory(w http.ResponseWriter, r *http.Request, categoryId CategoryId)
+	// GetVendorCategory Get one of the logged-in vendor's menu categories
+	// (GET /v1/vendor/categories/{categoryId})
+	GetVendorCategory(w http.ResponseWriter, r *http.Request, categoryId CategoryId)
+	// UpdateVendorCategory Rename one of the logged-in vendor's menu categories
+	// (PUT /v1/vendor/categories/{categoryId})
+	UpdateVendorCategory(w http.ResponseWriter, r *http.Request, categoryId CategoryId)
 	// VendorLogin Vendor staff login
 	// (POST /v1/vendor/login)
 	VendorLogin(w http.ResponseWriter, r *http.Request)
@@ -65,6 +164,21 @@ type ServerInterface interface {
 	// VendorMe Get the currently authenticated vendor's profile
 	// (GET /v1/vendor/me)
 	VendorMe(w http.ResponseWriter, r *http.Request)
+	// ListVendorProducts List the logged-in vendor's products, including unavailable ones
+	// (GET /v1/vendor/products)
+	ListVendorProducts(w http.ResponseWriter, r *http.Request)
+	// CreateVendorProduct Create a product for the logged-in vendor
+	// (POST /v1/vendor/products)
+	CreateVendorProduct(w http.ResponseWriter, r *http.Request)
+	// DeleteVendorProduct Delete one of the logged-in vendor's products
+	// (DELETE /v1/vendor/products/{productId})
+	DeleteVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId)
+	// GetVendorProduct Get one of the logged-in vendor's products
+	// (GET /v1/vendor/products/{productId})
+	GetVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId)
+	// UpdateVendorProduct Replace all fields of one of the logged-in vendor's products
+	// (PUT /v1/vendor/products/{productId})
+	UpdateVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -74,6 +188,36 @@ type Unimplemented struct{}
 // GetStatus Get service status
 // (GET /v1/status)
 func (_ Unimplemented) GetStatus(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// ListVendorCategories List the logged-in vendor's menu categories
+// (GET /v1/vendor/categories)
+func (_ Unimplemented) ListVendorCategories(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateVendorCategory Create a menu category for the logged-in vendor
+// (POST /v1/vendor/categories)
+func (_ Unimplemented) CreateVendorCategory(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DeleteVendorCategory Archive one of the logged-in vendor's menu categories (must have no active products)
+// (DELETE /v1/vendor/categories/{categoryId})
+func (_ Unimplemented) DeleteVendorCategory(w http.ResponseWriter, r *http.Request, categoryId CategoryId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetVendorCategory Get one of the logged-in vendor's menu categories
+// (GET /v1/vendor/categories/{categoryId})
+func (_ Unimplemented) GetVendorCategory(w http.ResponseWriter, r *http.Request, categoryId CategoryId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdateVendorCategory Rename one of the logged-in vendor's menu categories
+// (PUT /v1/vendor/categories/{categoryId})
+func (_ Unimplemented) UpdateVendorCategory(w http.ResponseWriter, r *http.Request, categoryId CategoryId) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -95,6 +239,36 @@ func (_ Unimplemented) VendorMe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// ListVendorProducts List the logged-in vendor's products, including unavailable ones
+// (GET /v1/vendor/products)
+func (_ Unimplemented) ListVendorProducts(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// CreateVendorProduct Create a product for the logged-in vendor
+// (POST /v1/vendor/products)
+func (_ Unimplemented) CreateVendorProduct(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// DeleteVendorProduct Delete one of the logged-in vendor's products
+// (DELETE /v1/vendor/products/{productId})
+func (_ Unimplemented) DeleteVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// GetVendorProduct Get one of the logged-in vendor's products
+// (GET /v1/vendor/products/{productId})
+func (_ Unimplemented) GetVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// UpdateVendorProduct Replace all fields of one of the logged-in vendor's products
+// (PUT /v1/vendor/products/{productId})
+func (_ Unimplemented) UpdateVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ServerInterfaceWrapper converts contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler            ServerInterface
@@ -109,6 +283,112 @@ func (siw *ServerInterfaceWrapper) GetStatus(w http.ResponseWriter, r *http.Requ
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetStatus(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListVendorCategories operation middleware
+func (siw *ServerInterfaceWrapper) ListVendorCategories(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListVendorCategories(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateVendorCategory operation middleware
+func (siw *ServerInterfaceWrapper) CreateVendorCategory(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateVendorCategory(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteVendorCategory operation middleware
+func (siw *ServerInterfaceWrapper) DeleteVendorCategory(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "categoryId" -------------
+	var categoryId CategoryId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "categoryId", chi.URLParam(r, "categoryId"), &categoryId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteVendorCategory(w, r, categoryId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetVendorCategory operation middleware
+func (siw *ServerInterfaceWrapper) GetVendorCategory(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "categoryId" -------------
+	var categoryId CategoryId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "categoryId", chi.URLParam(r, "categoryId"), &categoryId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetVendorCategory(w, r, categoryId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateVendorCategory operation middleware
+func (siw *ServerInterfaceWrapper) UpdateVendorCategory(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "categoryId" -------------
+	var categoryId CategoryId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "categoryId", chi.URLParam(r, "categoryId"), &categoryId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateVendorCategory(w, r, categoryId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -151,6 +431,112 @@ func (siw *ServerInterfaceWrapper) VendorMe(w http.ResponseWriter, r *http.Reque
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.VendorMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListVendorProducts operation middleware
+func (siw *ServerInterfaceWrapper) ListVendorProducts(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListVendorProducts(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateVendorProduct operation middleware
+func (siw *ServerInterfaceWrapper) CreateVendorProduct(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateVendorProduct(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteVendorProduct operation middleware
+func (siw *ServerInterfaceWrapper) DeleteVendorProduct(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "productId" -------------
+	var productId ProductId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "productId", chi.URLParam(r, "productId"), &productId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteVendorProduct(w, r, productId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetVendorProduct operation middleware
+func (siw *ServerInterfaceWrapper) GetVendorProduct(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "productId" -------------
+	var productId ProductId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "productId", chi.URLParam(r, "productId"), &productId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetVendorProduct(w, r, productId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateVendorProduct operation middleware
+func (siw *ServerInterfaceWrapper) UpdateVendorProduct(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "productId" -------------
+	var productId ProductId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "productId", chi.URLParam(r, "productId"), &productId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: "int64", ValueIsUnescaped: r.URL.RawPath == ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateVendorProduct(w, r, productId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -283,11 +669,55 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/v1/vendor/me", wrapper.VendorMe)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/vendor/categories", wrapper.ListVendorCategories)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/v1/vendor/categories", wrapper.CreateVendorCategory)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/v1/vendor/categories/{categoryId}", wrapper.DeleteVendorCategory)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/vendor/categories/{categoryId}", wrapper.GetVendorCategory)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/v1/vendor/categories/{categoryId}", wrapper.UpdateVendorCategory)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/vendor/products", wrapper.ListVendorProducts)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/v1/vendor/products", wrapper.CreateVendorProduct)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/v1/vendor/products/{productId}", wrapper.DeleteVendorProduct)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/v1/vendor/products/{productId}", wrapper.GetVendorProduct)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/v1/vendor/products/{productId}", wrapper.UpdateVendorProduct)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/v1/status", wrapper.GetStatus)
 	})
 
 	return r
 }
+
+type BadRequestJSONResponse ErrorResponse
+
+type CategoryNameTakenJSONResponse ErrorResponse
+
+type CategoryNotEmptyJSONResponse ErrorResponse
+
+type CategoryNotFoundJSONResponse ErrorResponse
+
+type ProductNameTakenJSONResponse ErrorResponse
+
+type ProductNotFoundJSONResponse ErrorResponse
+
+type UnauthorizedJSONResponse ErrorResponse
 
 type GetStatusRequestObject struct {
 }
@@ -320,6 +750,292 @@ func (response GetStatus503JSONResponse) VisitGetStatusResponse(w http.ResponseW
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(503)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListVendorCategoriesRequestObject struct {
+}
+
+type ListVendorCategoriesResponseObject interface {
+	VisitListVendorCategoriesResponse(w http.ResponseWriter) error
+}
+
+type ListVendorCategories200JSONResponse []Category
+
+func (response ListVendorCategories200JSONResponse) VisitListVendorCategoriesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListVendorCategories401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response ListVendorCategories401JSONResponse) VisitListVendorCategoriesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateVendorCategoryRequestObject struct {
+	Body *CreateVendorCategoryJSONRequestBody
+}
+
+type CreateVendorCategoryResponseObject interface {
+	VisitCreateVendorCategoryResponse(w http.ResponseWriter) error
+}
+
+type CreateVendorCategory201JSONResponse Category
+
+func (response CreateVendorCategory201JSONResponse) VisitCreateVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateVendorCategory400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response CreateVendorCategory400JSONResponse) VisitCreateVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateVendorCategory401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response CreateVendorCategory401JSONResponse) VisitCreateVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateVendorCategory409JSONResponse struct{ CategoryNameTakenJSONResponse }
+
+func (response CreateVendorCategory409JSONResponse) VisitCreateVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteVendorCategoryRequestObject struct {
+	CategoryId CategoryId `json:"categoryId"`
+}
+
+type DeleteVendorCategoryResponseObject interface {
+	VisitDeleteVendorCategoryResponse(w http.ResponseWriter) error
+}
+
+type DeleteVendorCategory204Response struct {
+}
+
+func (response DeleteVendorCategory204Response) VisitDeleteVendorCategoryResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteVendorCategory401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response DeleteVendorCategory401JSONResponse) VisitDeleteVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteVendorCategory404JSONResponse struct{ CategoryNotFoundJSONResponse }
+
+func (response DeleteVendorCategory404JSONResponse) VisitDeleteVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteVendorCategory409JSONResponse struct{ CategoryNotEmptyJSONResponse }
+
+func (response DeleteVendorCategory409JSONResponse) VisitDeleteVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetVendorCategoryRequestObject struct {
+	CategoryId CategoryId `json:"categoryId"`
+}
+
+type GetVendorCategoryResponseObject interface {
+	VisitGetVendorCategoryResponse(w http.ResponseWriter) error
+}
+
+type GetVendorCategory200JSONResponse Category
+
+func (response GetVendorCategory200JSONResponse) VisitGetVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetVendorCategory401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response GetVendorCategory401JSONResponse) VisitGetVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetVendorCategory404JSONResponse struct{ CategoryNotFoundJSONResponse }
+
+func (response GetVendorCategory404JSONResponse) VisitGetVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorCategoryRequestObject struct {
+	CategoryId CategoryId `json:"categoryId"`
+	Body       *UpdateVendorCategoryJSONRequestBody
+}
+
+type UpdateVendorCategoryResponseObject interface {
+	VisitUpdateVendorCategoryResponse(w http.ResponseWriter) error
+}
+
+type UpdateVendorCategory200JSONResponse Category
+
+func (response UpdateVendorCategory200JSONResponse) VisitUpdateVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorCategory400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response UpdateVendorCategory400JSONResponse) VisitUpdateVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorCategory401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response UpdateVendorCategory401JSONResponse) VisitUpdateVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorCategory404JSONResponse struct{ CategoryNotFoundJSONResponse }
+
+func (response UpdateVendorCategory404JSONResponse) VisitUpdateVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorCategory409JSONResponse struct{ CategoryNameTakenJSONResponse }
+
+func (response UpdateVendorCategory409JSONResponse) VisitUpdateVendorCategoryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -428,11 +1144,312 @@ func (response VendorMe401JSONResponse) VisitVendorMeResponse(w http.ResponseWri
 	return err
 }
 
+type ListVendorProductsRequestObject struct {
+}
+
+type ListVendorProductsResponseObject interface {
+	VisitListVendorProductsResponse(w http.ResponseWriter) error
+}
+
+type ListVendorProducts200JSONResponse []Product
+
+func (response ListVendorProducts200JSONResponse) VisitListVendorProductsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListVendorProducts401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response ListVendorProducts401JSONResponse) VisitListVendorProductsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateVendorProductRequestObject struct {
+	Body *CreateVendorProductJSONRequestBody
+}
+
+type CreateVendorProductResponseObject interface {
+	VisitCreateVendorProductResponse(w http.ResponseWriter) error
+}
+
+type CreateVendorProduct201JSONResponse Product
+
+func (response CreateVendorProduct201JSONResponse) VisitCreateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateVendorProduct400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response CreateVendorProduct400JSONResponse) VisitCreateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateVendorProduct401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response CreateVendorProduct401JSONResponse) VisitCreateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateVendorProduct404JSONResponse ErrorResponse
+
+func (response CreateVendorProduct404JSONResponse) VisitCreateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateVendorProduct409JSONResponse struct{ ProductNameTakenJSONResponse }
+
+func (response CreateVendorProduct409JSONResponse) VisitCreateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteVendorProductRequestObject struct {
+	ProductId ProductId `json:"productId"`
+}
+
+type DeleteVendorProductResponseObject interface {
+	VisitDeleteVendorProductResponse(w http.ResponseWriter) error
+}
+
+type DeleteVendorProduct204Response struct {
+}
+
+func (response DeleteVendorProduct204Response) VisitDeleteVendorProductResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteVendorProduct401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response DeleteVendorProduct401JSONResponse) VisitDeleteVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteVendorProduct404JSONResponse struct{ ProductNotFoundJSONResponse }
+
+func (response DeleteVendorProduct404JSONResponse) VisitDeleteVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetVendorProductRequestObject struct {
+	ProductId ProductId `json:"productId"`
+}
+
+type GetVendorProductResponseObject interface {
+	VisitGetVendorProductResponse(w http.ResponseWriter) error
+}
+
+type GetVendorProduct200JSONResponse Product
+
+func (response GetVendorProduct200JSONResponse) VisitGetVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetVendorProduct401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response GetVendorProduct401JSONResponse) VisitGetVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetVendorProduct404JSONResponse struct{ ProductNotFoundJSONResponse }
+
+func (response GetVendorProduct404JSONResponse) VisitGetVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorProductRequestObject struct {
+	ProductId ProductId `json:"productId"`
+	Body      *UpdateVendorProductJSONRequestBody
+}
+
+type UpdateVendorProductResponseObject interface {
+	VisitUpdateVendorProductResponse(w http.ResponseWriter) error
+}
+
+type UpdateVendorProduct200JSONResponse Product
+
+func (response UpdateVendorProduct200JSONResponse) VisitUpdateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorProduct400JSONResponse struct{ BadRequestJSONResponse }
+
+func (response UpdateVendorProduct400JSONResponse) VisitUpdateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorProduct401JSONResponse struct{ UnauthorizedJSONResponse }
+
+func (response UpdateVendorProduct401JSONResponse) VisitUpdateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorProduct404JSONResponse ErrorResponse
+
+func (response UpdateVendorProduct404JSONResponse) VisitUpdateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateVendorProduct409JSONResponse struct{ ProductNameTakenJSONResponse }
+
+func (response UpdateVendorProduct409JSONResponse) VisitUpdateVendorProductResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// GetStatus Get service status
 	// (GET /v1/status)
 	GetStatus(ctx context.Context, request GetStatusRequestObject) (GetStatusResponseObject, error)
+	// ListVendorCategories List the logged-in vendor's menu categories
+	// (GET /v1/vendor/categories)
+	ListVendorCategories(ctx context.Context, request ListVendorCategoriesRequestObject) (ListVendorCategoriesResponseObject, error)
+	// CreateVendorCategory Create a menu category for the logged-in vendor
+	// (POST /v1/vendor/categories)
+	CreateVendorCategory(ctx context.Context, request CreateVendorCategoryRequestObject) (CreateVendorCategoryResponseObject, error)
+	// DeleteVendorCategory Archive one of the logged-in vendor's menu categories (must have no active products)
+	// (DELETE /v1/vendor/categories/{categoryId})
+	DeleteVendorCategory(ctx context.Context, request DeleteVendorCategoryRequestObject) (DeleteVendorCategoryResponseObject, error)
+	// GetVendorCategory Get one of the logged-in vendor's menu categories
+	// (GET /v1/vendor/categories/{categoryId})
+	GetVendorCategory(ctx context.Context, request GetVendorCategoryRequestObject) (GetVendorCategoryResponseObject, error)
+	// UpdateVendorCategory Rename one of the logged-in vendor's menu categories
+	// (PUT /v1/vendor/categories/{categoryId})
+	UpdateVendorCategory(ctx context.Context, request UpdateVendorCategoryRequestObject) (UpdateVendorCategoryResponseObject, error)
 	// VendorLogin Vendor staff login
 	// (POST /v1/vendor/login)
 	VendorLogin(ctx context.Context, request VendorLoginRequestObject) (VendorLoginResponseObject, error)
@@ -442,6 +1459,21 @@ type StrictServerInterface interface {
 	// VendorMe Get the currently authenticated vendor's profile
 	// (GET /v1/vendor/me)
 	VendorMe(ctx context.Context, request VendorMeRequestObject) (VendorMeResponseObject, error)
+	// ListVendorProducts List the logged-in vendor's products, including unavailable ones
+	// (GET /v1/vendor/products)
+	ListVendorProducts(ctx context.Context, request ListVendorProductsRequestObject) (ListVendorProductsResponseObject, error)
+	// CreateVendorProduct Create a product for the logged-in vendor
+	// (POST /v1/vendor/products)
+	CreateVendorProduct(ctx context.Context, request CreateVendorProductRequestObject) (CreateVendorProductResponseObject, error)
+	// DeleteVendorProduct Delete one of the logged-in vendor's products
+	// (DELETE /v1/vendor/products/{productId})
+	DeleteVendorProduct(ctx context.Context, request DeleteVendorProductRequestObject) (DeleteVendorProductResponseObject, error)
+	// GetVendorProduct Get one of the logged-in vendor's products
+	// (GET /v1/vendor/products/{productId})
+	GetVendorProduct(ctx context.Context, request GetVendorProductRequestObject) (GetVendorProductResponseObject, error)
+	// UpdateVendorProduct Replace all fields of one of the logged-in vendor's products
+	// (PUT /v1/vendor/products/{productId})
+	UpdateVendorProduct(ctx context.Context, request UpdateVendorProductRequestObject) (UpdateVendorProductResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -500,6 +1532,146 @@ func (sh *strictHandler) GetStatus(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetStatusResponseObject); ok {
 		if err := validResponse.VisitGetStatusResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListVendorCategories operation middleware
+func (sh *strictHandler) ListVendorCategories(w http.ResponseWriter, r *http.Request) {
+	var request ListVendorCategoriesRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListVendorCategories(ctx, request.(ListVendorCategoriesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListVendorCategories")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListVendorCategoriesResponseObject); ok {
+		if err := validResponse.VisitListVendorCategoriesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateVendorCategory operation middleware
+func (sh *strictHandler) CreateVendorCategory(w http.ResponseWriter, r *http.Request) {
+	var request CreateVendorCategoryRequestObject
+
+	var body CreateVendorCategoryJSONRequestBody
+	if err := runtime.BindJSONBody(r, &body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateVendorCategory(ctx, request.(CreateVendorCategoryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateVendorCategory")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateVendorCategoryResponseObject); ok {
+		if err := validResponse.VisitCreateVendorCategoryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteVendorCategory operation middleware
+func (sh *strictHandler) DeleteVendorCategory(w http.ResponseWriter, r *http.Request, categoryId CategoryId) {
+	var request DeleteVendorCategoryRequestObject
+
+	request.CategoryId = categoryId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteVendorCategory(ctx, request.(DeleteVendorCategoryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteVendorCategory")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteVendorCategoryResponseObject); ok {
+		if err := validResponse.VisitDeleteVendorCategoryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetVendorCategory operation middleware
+func (sh *strictHandler) GetVendorCategory(w http.ResponseWriter, r *http.Request, categoryId CategoryId) {
+	var request GetVendorCategoryRequestObject
+
+	request.CategoryId = categoryId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetVendorCategory(ctx, request.(GetVendorCategoryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetVendorCategory")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetVendorCategoryResponseObject); ok {
+		if err := validResponse.VisitGetVendorCategoryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateVendorCategory operation middleware
+func (sh *strictHandler) UpdateVendorCategory(w http.ResponseWriter, r *http.Request, categoryId CategoryId) {
+	var request UpdateVendorCategoryRequestObject
+
+	request.CategoryId = categoryId
+
+	var body UpdateVendorCategoryJSONRequestBody
+	if err := runtime.BindJSONBody(r, &body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateVendorCategory(ctx, request.(UpdateVendorCategoryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateVendorCategory")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateVendorCategoryResponseObject); ok {
+		if err := validResponse.VisitUpdateVendorCategoryResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -579,6 +1751,146 @@ func (sh *strictHandler) VendorMe(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(VendorMeResponseObject); ok {
 		if err := validResponse.VisitVendorMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListVendorProducts operation middleware
+func (sh *strictHandler) ListVendorProducts(w http.ResponseWriter, r *http.Request) {
+	var request ListVendorProductsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListVendorProducts(ctx, request.(ListVendorProductsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListVendorProducts")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListVendorProductsResponseObject); ok {
+		if err := validResponse.VisitListVendorProductsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateVendorProduct operation middleware
+func (sh *strictHandler) CreateVendorProduct(w http.ResponseWriter, r *http.Request) {
+	var request CreateVendorProductRequestObject
+
+	var body CreateVendorProductJSONRequestBody
+	if err := runtime.BindJSONBody(r, &body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateVendorProduct(ctx, request.(CreateVendorProductRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateVendorProduct")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateVendorProductResponseObject); ok {
+		if err := validResponse.VisitCreateVendorProductResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteVendorProduct operation middleware
+func (sh *strictHandler) DeleteVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId) {
+	var request DeleteVendorProductRequestObject
+
+	request.ProductId = productId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteVendorProduct(ctx, request.(DeleteVendorProductRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteVendorProduct")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteVendorProductResponseObject); ok {
+		if err := validResponse.VisitDeleteVendorProductResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetVendorProduct operation middleware
+func (sh *strictHandler) GetVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId) {
+	var request GetVendorProductRequestObject
+
+	request.ProductId = productId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetVendorProduct(ctx, request.(GetVendorProductRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetVendorProduct")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetVendorProductResponseObject); ok {
+		if err := validResponse.VisitGetVendorProductResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateVendorProduct operation middleware
+func (sh *strictHandler) UpdateVendorProduct(w http.ResponseWriter, r *http.Request, productId ProductId) {
+	var request UpdateVendorProductRequestObject
+
+	request.ProductId = productId
+
+	var body UpdateVendorProductJSONRequestBody
+	if err := runtime.BindJSONBody(r, &body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateVendorProduct(ctx, request.(UpdateVendorProductRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateVendorProduct")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateVendorProductResponseObject); ok {
+		if err := validResponse.VisitUpdateVendorProductResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
