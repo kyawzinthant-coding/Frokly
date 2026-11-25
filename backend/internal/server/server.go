@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -63,9 +64,15 @@ func NewHttpServer(
 
 	r.Use(requireVendorAuth(publicRoutes, []byte(cfg.JWT.Secret)))
 
-	strict := api.NewStrictHandler(h, nil)
+	strict := api.NewStrictHandlerWithOptions(h, nil, api.StrictHTTPServerOptions{
+		RequestErrorHandlerFunc:  handleRequestError,
+		ResponseErrorHandlerFunc: handleResponseError,
+	})
 
-	mux := api.HandlerFromMux(strict, r)
+	mux := api.HandlerWithOptions(strict, api.ChiServerOptions{
+		BaseRouter:       r,
+		ErrorHandlerFunc: handleRequestError,
+	})
 
 	return &HttpServer{
 		cfg:    cfg,
@@ -113,4 +120,23 @@ func requireVendorAuth(public map[string]bool, secret []byte) func(http.Handler)
 			protected.ServeHTTP(w, r)
 		})
 	}
+}
+
+const msgInternalServerError = "internal server error"
+
+func handleRequestError(w http.ResponseWriter, r *http.Request, err error) {
+	log.Warn().Err(err).Str("path", r.URL.Path).Str("method", r.Method).Msg("bad request")
+	writeError(w, http.StatusBadRequest, err.Error())
+}
+
+// The real error stays in the server log; the client only gets a generic message.
+func handleResponseError(w http.ResponseWriter, r *http.Request, err error) {
+	log.Error().Err(err).Str("path", r.URL.Path).Str("method", r.Method).Msg("internal server error")
+	writeError(w, http.StatusInternalServerError, msgInternalServerError)
+}
+
+func writeError(w http.ResponseWriter, status int, msg string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(api.ErrorResponse{Error: msg})
 }

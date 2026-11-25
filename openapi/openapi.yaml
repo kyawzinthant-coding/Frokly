@@ -67,6 +67,218 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /v1/vendor/categories:
+    get:
+      operationId: listVendorCategories
+      summary: List the logged-in vendor's menu categories
+      security:
+        - vendorCookieAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createVendorCategory
+      summary: Create a menu category for the logged-in vendor
+      security:
+        - vendorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/CategoryNameTaken"
+
+  /v1/vendor/categories/{categoryId}:
+    parameters:
+      - $ref: "#/components/parameters/CategoryId"
+    get:
+      operationId: getVendorCategory
+      summary: Get one of the logged-in vendor's menu categories
+      security:
+        - vendorCookieAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/CategoryNotFound"
+    put:
+      operationId: updateVendorCategory
+      summary: Rename one of the logged-in vendor's menu categories
+      security:
+        - vendorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/CategoryNotFound"
+        "409":
+          $ref: "#/components/responses/CategoryNameTaken"
+    delete:
+      operationId: deleteVendorCategory
+      summary: Archive one of the logged-in vendor's menu categories (must have no active products)
+      security:
+        - vendorCookieAuth: []
+      responses:
+        "204":
+          description: Archived
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/CategoryNotFound"
+        "409":
+          $ref: "#/components/responses/CategoryNotEmpty"
+
+  /v1/vendor/products:
+    get:
+      operationId: listVendorProducts
+      summary: List the logged-in vendor's products, including unavailable ones
+      security:
+        - vendorCookieAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createVendorProduct
+      summary: Create a product for the logged-in vendor
+      security:
+        - vendorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Category not found for this vendor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          $ref: "#/components/responses/ProductNameTaken"
+
+  /v1/vendor/products/{productId}:
+    parameters:
+      - $ref: "#/components/parameters/ProductId"
+    get:
+      operationId: getVendorProduct
+      summary: Get one of the logged-in vendor's products
+      security:
+        - vendorCookieAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/ProductNotFound"
+    put:
+      operationId: updateVendorProduct
+      summary: Replace all fields of one of the logged-in vendor's products
+      security:
+        - vendorCookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Product or category not found for this vendor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          $ref: "#/components/responses/ProductNameTaken"
+    delete:
+      operationId: deleteVendorProduct
+      summary: Delete one of the logged-in vendor's products
+      security:
+        - vendorCookieAuth: []
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/ProductNotFound"
+
   /v1/status:
     get:
       operationId: getStatus
@@ -86,6 +298,66 @@ paths:
                 $ref: "#/components/schemas/StatusResponse"
 
 components:
+  parameters:
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+    CategoryId:
+      name: categoryId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  responses:
+    BadRequest:
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Missing, invalid, or expired session
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ProductNotFound:
+      description: Product not found for this vendor
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ProductNameTaken:
+      description: This vendor already has a product with that name
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    CategoryNotFound:
+      description: Category not found for this vendor
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    CategoryNameTaken:
+      description: This vendor already has a category with that name
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    CategoryNotEmpty:
+      description: Category still has active products; move or archive them first
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
   securitySchemes:
     vendorCookieAuth:
       type: apiKey
@@ -121,6 +393,96 @@ components:
         - id
         - name
         - username
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      required:
+        - id
+        - name
+
+    CategoryRequest:
+      type: object
+      description: Used by both create and update. The vendor comes from the session, never the body.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Noodles
+      required:
+        - name
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+          format: int64
+          description: Price in the smallest currency unit (satang), never a float
+          example: 6500
+        imageUrl:
+          type: string
+          nullable: true
+        categoryId:
+          type: integer
+          format: int64
+        isAvailable:
+          type: boolean
+      required:
+        - id
+        - name
+        - description
+        - price
+        - imageUrl
+        - categoryId
+        - isAvailable
+
+    ProductRequest:
+      type: object
+      description: Used by both create and update. The vendor comes from the session, never the body.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Pad Thai
+        description:
+          type: string
+          maxLength: 500
+          example: Rice noodles with egg and peanuts
+        price:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Price in the smallest currency unit (satang)
+          example: 6500
+        imageUrl:
+          type: string
+          nullable: true
+        categoryId:
+          type: integer
+          format: int64
+        isAvailable:
+          type: boolean
+      required:
+        - name
+        - description
+        - price
+        - categoryId
+        - isAvailable
 
     ErrorResponse:
       type: object

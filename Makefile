@@ -5,7 +5,7 @@ MIGRATE_CMD=cd backend && go run ./cmd/migrate
 -include Makefile.local
 -include $(ENV_FILE)
 
-.PHONY: run gen-api gen-db generate migrate-up migrate-down migrate-reset migrate-status test test-v test-pkg test-cover
+.PHONY: run gen-api gen-db generate migrate-up migrate-down migrate-reset migrate-status test test-db test-v test-pkg test-cover
 
 build:
 	@cd backend && go build -o bin/backend cmd/api/main.go
@@ -46,6 +46,10 @@ generate: gen-api gen-db
 # Run every test in the backend.
 test:
 	cd backend && go test ./...
+
+# Same, plus tests that need the local Postgres (rolled back, leaves no data).
+test-db:
+	@cd backend && FORKLY_TEST_DATABASE_URL="postgres://$(DATABASE_USERNAME):$(DATABASE_PASSWORD)@$(DATABASE_HOST):$(DATABASE_PORT)/$(DATABASE_NAME)?sslmode=disable" go test ./...
 
 # Same, but print each test name and PASS/FAIL.
 test-v:

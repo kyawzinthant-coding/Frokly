@@ -17,6 +17,10 @@ func VendorClaimsFromContext(ctx context.Context) (*types.VendorClaims, bool) {
 	return claims, ok
 }
 
+func ContextWithVendorClaims(ctx context.Context, claims *types.VendorClaims) context.Context {
+	return context.WithValue(ctx, vendorClaimsKey{}, claims)
+}
+
 func VendorJwtAuth(secret []byte) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -52,8 +56,7 @@ func VendorJwtAuth(secret []byte) func(next http.Handler) http.Handler {
 			log.Debug().
 				Msg("vendor auth: valid")
 
-			ctx := context.WithValue(r.Context(), vendorClaimsKey{}, claims)
-			next.ServeHTTP(w, r.WithContext(ctx))
+			next.ServeHTTP(w, r.WithContext(ContextWithVendorClaims(r.Context(), claims)))
 		})
 	}
 }

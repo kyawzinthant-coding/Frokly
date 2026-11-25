@@ -25,6 +25,7 @@ func main() {
 		modules.Config,
 		modules.Database,
 		modules.AuthModule,
+		modules.MenuModule,
 		modules.HandlerModule,
 		modules.ServerModule,
 	)
